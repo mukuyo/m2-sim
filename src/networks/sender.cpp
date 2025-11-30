@@ -69,8 +69,8 @@ void Sender::setDetectionInfo(SSL_DetectionFrame &detection, int camera_id, QVec
         SSL_DetectionBall* ball = detection.add_balls();
         ball->set_confidence(1.0);
         ball->set_x(ball_position.x());
-        ball->set_y(ball_position.y());
-        ball->set_z(ball_position.z());
+        ball->set_y(-ball_position.z());
+        ball->set_z(ball_position.y());
         ball->set_pixel_x(0);
         ball->set_pixel_y(0);
     // }
