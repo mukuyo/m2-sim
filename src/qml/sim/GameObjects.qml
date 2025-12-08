@@ -64,6 +64,7 @@ Node {
     property real botCursorID: 0
     property var kick_flag: false
     property var isDribble: false
+    property var dribbleNum: -1
     property var ballPosition: Qt.vector3d(0, 0, 0)
     
     MotionControl {
@@ -374,8 +375,8 @@ Node {
 
             let botDistanceBall = Math.sqrt(Math.pow(frame.position.x - ballPosition.x, 2) + Math.pow(frame.position.z - ballPosition.z, 2) + Math.pow(frame.position.y - ballPosition.y, 2));
             let botRadianBall = mu.normalizeRadian(Math.atan2(frame.position.z - ballPosition.z, frame.position.x - ballPosition.x) - Math.PI + color.poses[i].w);
-            if (!isYellow && i ==0)
-                console.log("bot", i, "distance to ball:", botDistanceBall, "radian to ball:", botRadianBall);
+            // if (!isYellow && i ==0)
+            //     console.log("bot", i, "distance to ball:", botDistanceBall, "radian to ball:", botRadianBall);
             
             if ((botDistanceBall < 105 * Math.cos(Math.abs(botRadianBall)) && Math.abs(botRadianBall) < Math.PI/15.0)) {
                 // isDribble = true;
@@ -398,6 +399,7 @@ Node {
     function updateGameObjects(timestep) 
     {
         isDribble = false;
+        
         botMovement(blue, timestep);
         botMovement(yellow, timestep, true);
 
@@ -418,6 +420,7 @@ Node {
     }
 
     function syncGameObjects() {
+        dribbleNum = -1;
         let blueBotData = sync.updateBot(blue, false);
         let yellowBotData = sync.updateBot(yellow, true);
         sync.updateBall();
