@@ -3,7 +3,6 @@ import QtQuick
 QtObject {
     function updateBot(color, isYellow=false) {
         let botFrame = isYellow ? yBotsFrame : bBotsFrame;
-        let botRepeater = isYellow ? yBotsRepeater : bBotsRepeater;
         let botPixelBalls = isYellow ? window.yBotPixelBalls : window.bBotPixelBalls;
         let botIDTexts = isYellow ? yBotIDTexts : bBotIDTexts;
 
@@ -13,10 +12,7 @@ QtObject {
 
         for (let i = 0; i < color.num; i++) {
             let frame = botFrame.children[i];
-            let bot = botRepeater.children[i];
-            bot.position = Qt.vector3d(frame.position.x, frame.position.y, frame.position.z);
-            bot.eulerRotation = Qt.vector3d(frame.eulerRotation.x, frame.eulerRotation.y, frame.eulerRotation.z);
-
+            
             botPositions.push(Qt.vector3d(frame.position.x, -frame.position.z, mu.radianToDegree(color.poses[i].w)));
             let botDistanceBall = Math.sqrt(Math.pow(frame.position.x - ballPosition.x, 2) + Math.pow(frame.position.z - ballPosition.z, 2) + Math.pow(frame.position.y - ballPosition.y, 2));
             let botRadianBall = mu.normalizeRadian(Math.atan2(frame.position.z - ballPosition.z, frame.position.x - ballPosition.x) - Math.PI + color.poses[i].w);

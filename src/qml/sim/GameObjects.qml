@@ -108,6 +108,7 @@ Node {
         model: blue.num
         DynamicRigidBody {
             objectName: "b" + String(index)
+            filterGroup: 1 << 0
             linearAxisLock: DynamicRigidBody.LockY
             position: Qt.vector4d(blue.poses[index].x, 0, blue.poses[index].z, blue.poses[index].w)
             collisionShapes: [
@@ -136,49 +137,6 @@ Node {
                     position: Qt.vector3d(0, 5000, 0)
                 }
             ]
-        }
-    }
-    Repeater3D {
-        id: yBotsFrame
-        model: yellow.num
-        DynamicRigidBody {
-            objectName: "y" + String(index)
-            linearAxisLock: DynamicRigidBody.LockY
-            position: Qt.vector4d(yellow.poses[index].x, 0, yellow.poses[index].z, yellow.poses[index].w)
-            collisionShapes: [
-                ConvexMeshShape {
-                    source: "../../../assets/models/bot/Rione/rigid_body/meshes/body.cooked.cvx"
-                    eulerRotation: Qt.vector3d(-90, 0, 0)
-                },
-                ConvexMeshShape { 
-                    source: "../../../assets/models/bot/Rione/rigid_body/meshes/centerLeft.cooked.cvx" 
-                    eulerRotation: Qt.vector3d(-90, 0, 0)
-                },
-                ConvexMeshShape { 
-                    source: "../../../assets/models/bot/Rione/rigid_body/meshes/centerRight.cooked.cvx" 
-                    eulerRotation: Qt.vector3d(-90, 0, 0)
-                },
-                ConvexMeshShape { 
-                    source: "../../../assets/models/bot/Rione/rigid_body/meshes/dribbler.cooked.cvx" 
-                    eulerRotation: Qt.vector3d(-90, 0, 0)
-                },
-                ConvexMeshShape {
-                    source: "../../../assets/models/bot/Rione/rigid_body/meshes/chip.cooked.cvx" 
-                    eulerRotation: Qt.vector3d(-90, 0, 0)
-                },
-                ConvexMeshShape {
-                    source: "../../../assets/models/ball/meshes/ball.cooked.cvx"
-                    position: Qt.vector3d(0, 5000, 0)
-                }
-            ]
-        }
-    }
-    
-    Repeater3D {
-        id: bBotsRepeater
-        model: blue.num
-        delegate: Node {
-            property int botIndex: index
             BlueBody.Visualize {
                 visible: !observer.lightBlueRobotMode
                 eulerRotation: Qt.vector3d(-90, 0, 0)
@@ -217,7 +175,6 @@ Node {
                     }
                 ]
             }
-
             Repeater3D {
                 model: 4
                 delegate: Model {
@@ -225,10 +182,10 @@ Node {
                     scale: Qt.vector3d(0.4, colorHeight, 0.4)
                     position: {
                         var offsets = [
-                            Qt.vector3d(65*Math.cos(Math.PI-radianOffset-blue.poses[index].w), 0, 65*Math.sin(Math.PI-radianOffset-blue.poses[index].w)),  // Left Up
-                            Qt.vector3d(65*Math.cos(Math.PI/2.0-radianOffset-blue.poses[index].w), 0, 65*Math.sin(Math.PI/2.0-radianOffset-blue.poses[index].w)), // Left Down
-                            Qt.vector3d(65*Math.cos(Math.PI/2.0+radianOffset-blue.poses[index].w), 0, 65*Math.sin(Math.PI/2.0+radianOffset-blue.poses[index].w)), // Right Down
-                            Qt.vector3d(65*Math.cos(radianOffset-blue.poses[index].w), 0, 65*Math.sin(radianOffset-blue.poses[index].w))   // Right Up
+                            Qt.vector3d(65*Math.cos(Math.PI-radianOffset), 0, 65*Math.sin(Math.PI-radianOffset)),  // Left Up
+                            Qt.vector3d(65*Math.cos(Math.PI/2.0-radianOffset), 0, 65*Math.sin(Math.PI/2.0-radianOffset)), // Left Down
+                            Qt.vector3d(65*Math.cos(Math.PI/2.0+radianOffset), 0, 65*Math.sin(Math.PI/2.0+radianOffset)), // Right Down
+                            Qt.vector3d(65*Math.cos(radianOffset), 0, 65*Math.sin(radianOffset))   // Right Up
                         ];
                         return Qt.vector3d(
                             offsets[index].x, 122, offsets[index].z
@@ -251,10 +208,38 @@ Node {
     // }
 
     Repeater3D {
-        id: yBotsRepeater
+        id: yBotsFrame
         model: yellow.num
-        delegate: Node {
-            property int botIndex: index
+        DynamicRigidBody {
+            objectName: "y" + String(index)
+            linearAxisLock: DynamicRigidBody.LockY
+            position: Qt.vector4d(yellow.poses[index].x, 0, yellow.poses[index].z, yellow.poses[index].w)
+            collisionShapes: [
+                ConvexMeshShape {
+                    source: "../../../assets/models/bot/Rione/rigid_body/meshes/body.cooked.cvx"
+                    eulerRotation: Qt.vector3d(-90, 0, 0)
+                },
+                ConvexMeshShape { 
+                    source: "../../../assets/models/bot/Rione/rigid_body/meshes/centerLeft.cooked.cvx" 
+                    eulerRotation: Qt.vector3d(-90, 0, 0)
+                },
+                ConvexMeshShape { 
+                    source: "../../../assets/models/bot/Rione/rigid_body/meshes/centerRight.cooked.cvx" 
+                    eulerRotation: Qt.vector3d(-90, 0, 0)
+                },
+                ConvexMeshShape { 
+                    source: "../../../assets/models/bot/Rione/rigid_body/meshes/dribbler.cooked.cvx" 
+                    eulerRotation: Qt.vector3d(-90, 0, 0)
+                },
+                ConvexMeshShape {
+                    source: "../../../assets/models/bot/Rione/rigid_body/meshes/chip.cooked.cvx" 
+                    eulerRotation: Qt.vector3d(-90, 0, 0)
+                },
+                ConvexMeshShape {
+                    source: "../../../assets/models/ball/meshes/ball.cooked.cvx"
+                    position: Qt.vector3d(0, 5000, 0)
+                }
+            ]
             YellowBody.Visualize {
                 visible: !observer.lightYellowRobotMode
                 eulerRotation: Qt.vector3d(-90, 0, 0)
@@ -301,10 +286,10 @@ Node {
                     scale: Qt.vector3d(0.4, colorHeight, 0.4)
                     position: {
                         var offsets = [
-                            Qt.vector3d(65*Math.cos(Math.PI-radianOffset-yellow.poses[index].w), 0, 65*Math.sin(Math.PI-radianOffset-yellow.poses[index].w)), // Left Up
-                            Qt.vector3d(65*Math.cos(Math.PI/2.0-radianOffset-yellow.poses[index].w), 0, 65*Math.sin(Math.PI/2.0-radianOffset-yellow.poses[index].w)), // Left Down
-                            Qt.vector3d(65*Math.cos(Math.PI/2.0+radianOffset-yellow.poses[index].w), 0, 65*Math.sin(Math.PI/2.0+radianOffset-yellow.poses[index].w)), // Right Down
-                            Qt.vector3d(65*Math.cos(radianOffset-yellow.poses[index].w), 0, 65*Math.sin(radianOffset-yellow.poses[index].w))   // Right Up
+                            Qt.vector3d(65*Math.cos(Math.PI-radianOffset), 0, 65*Math.sin(Math.PI-radianOffset)), // Left Up
+                            Qt.vector3d(65*Math.cos(Math.PI/2.0-radianOffset), 0, 65*Math.sin(Math.PI/2.0-radianOffset)), // Left Down
+                            Qt.vector3d(65*Math.cos(Math.PI/2.0+radianOffset), 0, 65*Math.sin(Math.PI/2.0+radianOffset)), // Right Down
+                            Qt.vector3d(65*Math.cos(radianOffset), 0, 65*Math.sin(radianOffset))   // Right Up
                         ];
                         return Qt.vector3d(
                             offsets[index].x,
@@ -355,7 +340,6 @@ Node {
 
     function botMovement(color, timestep, isYellow=false) {
         let botFrame = isYellow ? yBotsFrame : bBotsFrame;
-        let botRepeater = isYellow ? yBotsRepeater : bBotsRepeater;
 
         for (let i = 0; i < color.num; i++) {
             let frame = botFrame.children[i];
@@ -405,17 +389,16 @@ Node {
         if(!isDribble){
             kick_flag = false;
         }
-
         ball2DPosition = Qt.vector2d(ball.position.x, ball.position.z);
-        // if (teleopVelocity.x != 0 || teleopVelocity.y != 0 || teleopVelocity.z != 0){
-        //     if (!kick_flag) {
-        //         ball.setLinearVelocity(Qt.vector3d(teleopVelocity.x, teleopVelocity.y, teleopVelocity.z));
-        //         let ballFriction = 0.99;
-        //         teleopVelocity = Qt.vector3d(teleopVelocity.x * ballFriction, teleopVelocity.y * ballFriction, teleopVelocity.z * ballFriction);
-        //     } else {
-        //         teleopVelocity = Qt.vector3d(0, 0, 0);
-        //     }
-        // }
+        if (teleopVelocity.x != 0 || teleopVelocity.y != 0 || teleopVelocity.z != 0){
+            if (!kick_flag) {
+                ball.setLinearVelocity(Qt.vector3d(teleopVelocity.x, teleopVelocity.y, teleopVelocity.z));
+                let ballFriction = 0.99;
+                teleopVelocity = Qt.vector3d(teleopVelocity.x * ballFriction, teleopVelocity.y * ballFriction, teleopVelocity.z * ballFriction);
+            } else {
+                teleopVelocity = Qt.vector3d(0, 0, 0);
+            }
+        }
     }
 
     function syncGameObjects() {
@@ -477,17 +460,11 @@ Node {
     Component.onCompleted: {
         for (let i = 0; i < observer.blueRobotCount; i++) {
             let frame = bBotsFrame.children[i];
-            let bot = bBotsRepeater.children[i];
             frame.reset(Qt.vector3d(frame.position.x, 0, frame.position.z), Qt.vector3d(0, -90, 0));
-            bot.position = Qt.vector3d(frame.position.x, frame.position.y, frame.position.z);
-            bot.eulerRotation = Qt.vector3d(frame.eulerRotation.x, frame.eulerRotation.y, frame.eulerRotation.z);
         }
         for (let i = 0; i < observer.yellowRobotCount; i++) {
             let frame = yBotsFrame.children[i];
-            let bot = yBotsRepeater.children[i];
             frame.reset(Qt.vector3d(frame.position.x, 0, frame.position.z), Qt.vector3d(0, 90, 0));
-            bot.position = Qt.vector3d(frame.position.x, frame.position.y, frame.position.z);
-            bot.eulerRotation = Qt.vector3d(frame.eulerRotation.x, frame.eulerRotation.y, frame.eulerRotation.z);
         }
     }
 }
