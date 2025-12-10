@@ -12,6 +12,7 @@ import "../../../assets/models/bot/Rione/viz" as YellowBody
 import "../../../assets/models/bot/Rione/rigid_body" as YellowLightBody
 import "../../../assets/models/ball/"
 import "../../../assets/models/circle/ball/"
+import "../../../assets/models/circle/ballMarker/"
 
 Node {
     id: robotNode
@@ -67,7 +68,8 @@ Node {
     property var dribbleNum: -1
     property var remBotRadianBall: 0
     property var ballPosition: Qt.vector3d(0, 0, 0)
-    
+    property var ballModelNum: 10
+    property var ballPositions: new Array(ballModelNum).fill(Qt.vector3d(0, 0, 0))
     MotionControl {
         id: motionControl
     }
@@ -334,10 +336,18 @@ Node {
             }
         ]
     }
-    Ball {
-        id: tempBall
+    Repeater3D {
+        id: ballModels
+        model: ballModelNum
+        Ball {
+        }
     }
-
+    BallMarker {
+        id: ballMarker
+        eulerRotation: Qt.vector3d(0, 0, 0)
+        // opacity: 1
+        scale: Qt.vector3d(0.8, 0.01, 0.8)
+    }
     function botMovement(color, timestep, isYellow=false) {
         let botFrame = isYellow ? yBotsFrame : bBotsFrame;
 
@@ -445,7 +455,13 @@ Node {
             yBotsFrame.children[botCursorID].reset(scenePosition, Qt.vector3d(0, 90, 0));
         }
     }
-
+    function updateBallModel() {
+        for (let i = ballModelNum - 1; i > 0; i--) {
+            ballPositions[i] = ballPositions[i - 1];
+            ballModels.children[i].position = Qt.vector3d(ballPositions[i].x, ballPositions[i].y, ballPositions[i].z);
+        }
+        ballPositions[0] = Qt.vector3d(ballModels.children[0].position.x, ballModels.children[0].position.y, ballModels.children[0].position.z);
+    }
     Component.onCompleted: {
         for (let i = 0; i < observer.blueRobotCount; i++) {
             let frame = bBotsFrame.children[i];
@@ -455,6 +471,13 @@ Node {
             let frame = yBotsFrame.children[i];
             frame.reset(Qt.vector3d(frame.position.x, 0, frame.position.z), Qt.vector3d(0, 90, 0));
         }
+        for (let i = 1; i < ballModelNum; i++) {
+            // ballModels.children[i].children[0].materials[0].diffuseColor= "#FFFFFF";
+            ballModels.children[i].children[0].materials[0].opacity = 0.1;
+        }
+        ballMarker.children[0].materials[0].diffuseColor= "#EB392A";
+        ballMarker.children[0].materials[0].opacity = 0.8;
+        // ballMarker.children[0].diffuseColor = "#FF0000";
     }
 }
 

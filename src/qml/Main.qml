@@ -68,6 +68,14 @@ Window {
                 // console.log("RunTime:", runTime);
             }
         }
+        Timer {
+            interval: 1000.0 / (observer.desiredFps / 2)
+            running: true
+            repeat: true
+            onTriggered: {
+                game_objects.updateBallModel();
+            }
+        }
         Keys.onPressed: (event) => {
             event.accepted = true;
             if (event.key === Qt.Key_W) {

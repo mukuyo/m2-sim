@@ -43,12 +43,14 @@ QtObject {
     }
     function updateBall() {
         if (ball.position.x < 50000) {
-            tempBall.position = Qt.vector3d(ball.position.x, ball.position.y, ball.position.z);
+            ballModels.children[0].position = Qt.vector3d(ball.position.x, ball.position.y, ball.position.z);
             ballPosition = Qt.vector3d(ball.position.x, ball.position.y, ball.position.z);
         } else {
-            tempBall.position = Qt.vector3d(ballPosition.x, ballPosition.y, ballPosition.z);
+            ballModels.children[0].position = Qt.vector3d(ballPosition.x, ballPosition.y, ballPosition.z);
         }
+        ballMarker.position = Qt.vector3d(ballPosition.x, 5, ballPosition.z);
     }
+
     function kick(color, frame, i, radian) {
         frame.collisionShapes[5].position = Qt.vector3d(0, 5000, 0);
         if (ball.position.x > 50000) {
