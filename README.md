@@ -5,6 +5,11 @@ Welcome to m2-sim, a simulation tool designed for the [RoboCup Soccer Small Size
 
 ![M2 Simulation Image](docs/images/readme_v3.png)
 
+## Features Summary
+- Import custom 3D models
+- Get pixel coordinates from the camera mounted on the robot
+- Visualize values received via Protobuf by selecting each robot’s data
+
 ## System Requirements
 Before diving into the exciting world of RoboCup Soccer SSL with `m2-sim`, ensure your system meets the following requirements:
 
