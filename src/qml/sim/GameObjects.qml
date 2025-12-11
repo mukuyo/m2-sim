@@ -342,12 +342,12 @@ Node {
         Ball {
         }
     }
-    BallMarker {
-        id: ballMarker
-        eulerRotation: Qt.vector3d(0, 0, 0)
-        // opacity: 1
-        scale: Qt.vector3d(0.8, 0.01, 0.8)
-    }
+    // BallMarker {
+    //     id: ballMarker
+    //     eulerRotation: Qt.vector3d(0, 0, 0)
+    //     // opacity: 1
+    //     scale: Qt.vector3d(0.8, 0.01, 0.8)
+    // }
     function botMovement(color, timestep, isYellow=false) {
         let botFrame = isYellow ? yBotsFrame : bBotsFrame;
 
@@ -475,8 +475,8 @@ Node {
             // ballModels.children[i].children[0].materials[0].diffuseColor= "#FFFFFF";
             ballModels.children[i].children[0].materials[0].opacity = 0.1;
         }
-        ballMarker.children[0].materials[0].diffuseColor= "#EB392A";
-        ballMarker.children[0].materials[0].opacity = 0.8;
+        // ballMarker.children[0].materials[0].diffuseColor= "#EB392A";
+        // ballMarker.children[0].materials[0].opacity = 0.8;
         // ballMarker.children[0].diffuseColor = "#FF0000";
     }
 }

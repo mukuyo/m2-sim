@@ -48,7 +48,7 @@ QtObject {
         } else {
             ballModels.children[0].position = Qt.vector3d(ballPosition.x, ballPosition.y, ballPosition.z);
         }
-        ballMarker.position = Qt.vector3d(ballPosition.x, 5, ballPosition.z);
+        // ballMarker.position = Qt.vector3d(ballPosition.x, 5, ballPosition.z);
     }
 
     function kick(color, frame, i, radian) {
