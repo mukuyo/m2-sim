@@ -36,7 +36,7 @@ sudo apt install libeigen3-dev protobuf-compiler libyaml-cpp-dev cmake build-ess
 ```
 
 ### 2. Preparing 3D Models
-Please read [how to import custom 3D model](doc/import_model.md)
+Please read [how to import custom 3D model](docs/import_model.md)
 
 To properly visualize the simulation, download the required 3D models and place them in the following directory:
 ```
