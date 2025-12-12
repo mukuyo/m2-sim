@@ -9,7 +9,9 @@ Welcome to m2-sim, a simulation tool designed for the [RoboCup Soccer Small Size
 - Import custom 3D models
 - Get pixel coordinates from the camera mounted on the robot
 - Visualize values received via Protobuf by selecting each robot’s data
-
+  
+Please read [Documents](docs/)
+  
 ## System Requirements
 Before diving into the exciting world of RoboCup Soccer SSL with `m2-sim`, ensure your system meets the following requirements:
 
@@ -27,12 +29,15 @@ brew update
 brew install qt cmake boost@1.85 eigen protobuf@21 yaml-cpp vulkan-volk assimp bullet
 ```
 ### Ubuntu
+Please install Qt 6.8.
 ```bash
 sudo apt update
 sudo apt install libeigen3-dev protobuf-compiler libyaml-cpp-dev cmake build-essential libassimp-dev assimp-utils libbullet-dev libboost-all-dev
 ```
 
 ### 2. Preparing 3D Models
+Please read [how to import custom 3D model](doc/import_model.md)
+
 To properly visualize the simulation, download the required 3D models and place them in the following directory:
 ```
 ~/ws/m2-sim/assets/
@@ -42,13 +47,7 @@ You can download sample 3D models from the following link:
 [Download 3D Models](https://drive.google.com/drive/folders/17iXSCv_ecgYn4Mx0ziXjV6I9hVO665dg?usp=share_link)
 
 
-### 3. Generating Mesh Files
-```bash
-chmod +x generate_mesh.sh
-./generate_mesh.sh
-```
-
-### 4. Building the Project
+### 3. Building the Project
 Set up and build the project using the following steps:
 
 ```bash
@@ -58,14 +57,14 @@ cmake ..
 make
 ```
 
-### 5. Launch the GUI
+### 4. Launch the GUI
 Run the main application to start the GUI:
 ```bash
 make run
 ```
 This command executes the compiled binary and launches the graphical user interface. You can now start interacting with `m2-sim`.
 
-### 6. Additional Notes
+### 5. Additional Notes
 If you encounter errors during the build process, ensure all dependencies are installed and up-to-date. For troubleshooting, refer to the [official documentation](https://github.com/RoboCup-SSL/).
 
 ## Related Tools
