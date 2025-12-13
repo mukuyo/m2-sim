@@ -64,6 +64,7 @@ Node {
     property var selectedRobotColor: "blue"
     property real botCursorID: 0
     property var kick_flag: false
+    property var prepare_kick_flag: false
     property var isDribble: false
     property var dribbleNum: -1
     property var remBotRadianBall: 0
@@ -112,6 +113,7 @@ Node {
         DynamicRigidBody {
             objectName: "b" + String(index)
             linearAxisLock: DynamicRigidBody.LockY
+            sendContactReports: true
             position: Qt.vector4d(blue.poses[index].x, 0, blue.poses[index].z, blue.poses[index].w)
             collisionShapes: [
                 ConvexMeshShape {
@@ -177,6 +179,7 @@ Node {
                     }
                 ]
             }
+
             Repeater3D {
                 model: 4
                 delegate: Model {
@@ -208,13 +211,28 @@ Node {
     // onBBotNumChanged: {
     //     bBotsCamera = [];
     // }
-
+    // Repeater3D {
+    //     id: bBotStatus
+    //     model: blue.num
+    //     Model {
+    //         source: "#Cube"
+    //         scale: Qt.vector3d(1.9, 0.2, 0.2)
+    //         position: Qt.vector3d(0, 1000, 0)
+    //         opacity: 0.6
+    //         materials: [
+    //             DefaultMaterial {
+    //                 diffuseColor: "gray"
+    //             }
+    //         ]
+    //     }
+    // }
     Repeater3D {
         id: yBotsFrame
         model: yellow.num
         DynamicRigidBody {
             objectName: "y" + String(index)
             linearAxisLock: DynamicRigidBody.LockY
+            sendContactReports: true
             position: Qt.vector4d(yellow.poses[index].x, 0, yellow.poses[index].z, yellow.poses[index].w)
             collisionShapes: [
                 ConvexMeshShape {
@@ -236,7 +254,7 @@ Node {
                 ConvexMeshShape {
                     source: "../../../assets/models/bot/Rione/rigid_body/meshes/chip.cooked.cvx" 
                     eulerRotation: Qt.vector3d(-90, 0, 0)
-                },
+            },
                 ConvexMeshShape {
                     source: "../../../assets/models/ball/meshes/ball.cooked.cvx"
                     position: Qt.vector3d(0, 5000, 0)
@@ -328,6 +346,7 @@ Node {
         massMode: DynamicRigidBody.Mass
         mass: 0.043
         position: Qt.vector3d(0, 500, 0)
+        receiveContactReports: true
         physicsMaterial: ballMaterial
         collisionShapes: [
             ConvexMeshShape {
@@ -335,6 +354,21 @@ Node {
                 source: "../../../assets/models/ball/meshes/ball.cooked.cvx"
             }
         ]
+        onBodyContact: (body, positions, impulses, normals) => {
+            if (body.objectName.startsWith("b") || body.objectName.startsWith("y")) {
+                let color = body.objectName.startsWith("b") ? blue : yellow;
+                let id = parseInt(body.objectName.slice(1));
+                let frame = body.objectName.startsWith("b") ? bBotsFrame.children[id] : yBotsFrame.children[id];
+                let botDistanceBall = Math.sqrt(Math.pow(frame.position.x - ball.position.x, 2) + Math.pow(frame.position.z - ball.position.z, 2) + Math.pow(frame.position.y - ball.position.y, 2));
+                let botRadianBall = mu.normalizeRadian(Math.atan2(frame.position.z - ball.position.z, frame.position.x - ball.position.x) - Math.PI + color.poses[id].w);
+                if (botDistanceBall < 100 * Math.cos(Math.abs(botRadianBall)) && Math.abs(botRadianBall) < Math.PI/15.0 && color.spinners[id] > 0 && (color.kickspeeds[id].x == 0 && color.kickspeeds[id].y == 0 )) {
+                    color.holds[id] = true;
+                    ball.reset(Qt.vector3d(100000, 0, 100000), Qt.vector3d(0, 0, 0));
+                    frame.collisionShapes[5].position = Qt.vector3d(95*Math.tan(botRadianBall), 25, -95);
+                    dribbleNum = body.objectName.startsWith("b") ? id : id + 10;
+                }
+            }
+        }
     }
     Repeater3D {
         id: ballModels
@@ -342,12 +376,12 @@ Node {
         Ball {
         }
     }
-    // BallMarker {
-    //     id: ballMarker
-    //     eulerRotation: Qt.vector3d(0, 0, 0)
-    //     // opacity: 1
-    //     scale: Qt.vector3d(0.8, 0.01, 0.8)
-    // }
+    BallMarker {
+        id: ballMarker
+        eulerRotation: Qt.vector3d(0, 0, 0)
+        scale: Qt.vector3d(0.8, 0.01, 0.8)
+    }
+
     function botMovement(color, timestep, isYellow=false) {
         let botFrame = isYellow ? yBotsFrame : bBotsFrame;
 
@@ -370,7 +404,8 @@ Node {
             let botDistanceBall = Math.sqrt(Math.pow(frame.position.x - ballPosition.x, 2) + Math.pow(frame.position.z - ballPosition.z, 2) + Math.pow(frame.position.y - ballPosition.y, 2));
             let botRadianBall = mu.normalizeRadian(Math.atan2(frame.position.z - ballPosition.z, frame.position.x - ballPosition.x) - Math.PI + color.poses[i].w);
 
-            if ((botDistanceBall < 105 * Math.cos(Math.abs(botRadianBall)) && Math.abs(botRadianBall) < Math.PI/15.0)) {
+            if (color.holds[i]) {
+                isDribble = true;
                 if (color.kickspeeds[i].x != 0 || color.kickspeeds[i].y != 0) {
                     sync.kick(color, frame, i, color.poses[i].w);
                 }
@@ -381,6 +416,7 @@ Node {
     function updateGameObjects(timestep) 
     {
         isDribble = false;
+        prepare_kick_flag = false;
         
         botMovement(blue, timestep);
         botMovement(yellow, timestep, true);
@@ -455,6 +491,7 @@ Node {
             yBotsFrame.children[botCursorID].reset(scenePosition, Qt.vector3d(0, 90, 0));
         }
     }
+
     function updateBallModel() {
         for (let i = ballModelNum - 1; i > 0; i--) {
             ballPositions[i] = ballPositions[i - 1];
@@ -462,6 +499,7 @@ Node {
         }
         ballPositions[0] = Qt.vector3d(ballModels.children[0].position.x, ballModels.children[0].position.y, ballModels.children[0].position.z);
     }
+
     Component.onCompleted: {
         for (let i = 0; i < observer.blueRobotCount; i++) {
             let frame = bBotsFrame.children[i];
@@ -473,10 +511,10 @@ Node {
         }
         for (let i = 1; i < ballModelNum; i++) {
             // ballModels.children[i].children[0].materials[0].diffuseColor= "#FFFFFF";
-            ballModels.children[i].children[0].materials[0].opacity = 0.1;
+            ballModels.children[i].children[0].materials[0].opacity = 0;
         }
-        // ballMarker.children[0].materials[0].diffuseColor= "#EB392A";
-        // ballMarker.children[0].materials[0].opacity = 0.8;
+        ballMarker.children[0].materials[0].diffuseColor= "#EB392A";
+        ballMarker.children[0].materials[0].opacity = 0.4;
         // ballMarker.children[0].diffuseColor = "#FF0000";
     }
 }

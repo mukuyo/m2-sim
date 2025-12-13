@@ -138,15 +138,95 @@ Window {
                     text: "FPS: " +  Math.round(1000.0 / runTime)
                     opacity: 0.7
                 }
+
+                Item {
+                    id: bBotStatus
+                    Repeater {
+                        model: observer.blueRobotCount
+                        Rectangle {
+                            width: 19
+                            height: 4
+                            color: "transparent"
+                            border.color: "#59baf5"
+                            opacity: 0.5
+                            radius: 1
+                        }
+                    }
+                }
+                Item {
+                    id: bBotBar
+                    Repeater {
+                        model: observer.blueRobotCount
+                        Rectangle {
+                            width: 0
+                            height: 3
+                            color: "#59baf5"
+                            opacity: 0.5
+                            radius: 1
+                        }
+                    }
+                }
+                Item {
+                    id: bBotIDRect
+                    Repeater {
+                        model: observer.blueRobotCount
+                        Rectangle {
+                            width: 6
+                            height: 6
+                            color: "#59baf5"
+                            opacity: 0.5
+                            radius: 1
+                        }
+                    }
+                }
                 Item {
                     id: bBotIDTexts
                     Repeater {
                         model: observer.blueRobotCount
                         Text {
                             horizontalAlignment: Text.AlignLeft
-                            font.pixelSize: 11
-                            color: "#59baf5"
+                            font.pixelSize: 6
+                            color: "#FFFFFF"
                             text: index
+                        }
+                    }
+                }
+                Item {
+                    id: yBotStatus
+                    Repeater {
+                        model: observer.blueRobotCount
+                        Rectangle {
+                            width: 19
+                            height: 4
+                            color: "transparent"
+                            border.color: "yellow"
+                            opacity: 0.5
+                            radius: 1
+                        }
+                    }
+                }
+                Item {
+                    id: yBotBar
+                    Repeater {
+                        model: observer.yellowRobotCount
+                        Rectangle {
+                            width: 0
+                            height: 3
+                            color: "yellow"
+                            opacity: 0.5
+                            radius: 1
+                        }
+                    }
+                }
+                Item {
+                    id: yBotIDRect
+                    Repeater {
+                        model: observer.yellowRobotCount
+                        Rectangle {
+                            width: 6
+                            height: 6
+                            color: "yellow"
+                            opacity: 0.5
                         }
                     }
                 }
@@ -155,8 +235,9 @@ Window {
                     Repeater {
                         model: observer.yellowRobotCount
                         Text {
-                            font.pixelSize: 11
-                            color: "yellow"
+                            horizontalAlignment: Text.AlignLeft
+                            font.pixelSize: 6
+                            color: "#FFFFFF"
                             text: index
                         }
                     }
