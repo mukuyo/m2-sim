@@ -9,7 +9,7 @@ import QtQuick.Dialogs
 import QtQuick3D
 import QtQuick3D.Physics
 import Qt3D.Render
-import MOC
+import M2
 
 import "settings/"
 import "sim/"
@@ -17,7 +17,7 @@ import "viz/"
 
 Window {
     id: window
-    title: "m2-sim"
+    title: "M2-Sim"
     width: windowWidth
     height: windowHeight
     visible: true
@@ -27,12 +27,9 @@ Window {
     property var bBotPixelBalls: new Array(16).fill(Qt.vector2d(-1, -1))
     property var yBotPixelBalls: new Array(16).fill(Qt.vector2d(-1, -1))
     property var ball2DPosition: Qt.vector2d(0, 0)
-    property var bBot2DPositions: new Array(16).fill(Qt.vector2d(-1, -1))
-    property var yBot2DPositions: new Array(16).fill(Qt.vector2d(-1, -1))
     property var cursorPosition: Qt.point(0, 0)
-    property int bBotCount: observer.blueRobotCount
-    property int yBotCount: observer.yellowRobotCount
     property real runTime: 16.667
+    property real showRunTime: 16.667
     property var selectedCamera: "Overview Camera"
     property real lastTime: 0
     property int key: 0
@@ -45,28 +42,65 @@ Window {
         PhysicsWorld {
             id: physicsWorld
             scene: viewport.scene
-            maximumTimestep: 1000.0 / observer.desiredFps
-            minimumTimestep: 1000.0 / observer.desiredFps
+            // maximumTimestep: 1000.0 / observer.desiredFps
+            // minimumTimestep: 1000.0 / observer.desiredFps
             enableCCD: observer.ccdMode
             gravity: Qt.vector3d(0, -observer.gravity*1000.0, 0)
             typicalLength: 100
             typicalSpeed: 1000
             defaultDensity: 1.0
+            numThreads: observer.numThreads
             forceDebugDraw: observer.forceDebugDrawMode
             onFrameDone: (timestep) => {
                 game_objects.syncGameObjects();
+                showRunTime = runTime;
             }
         }
         Timer {
-            interval: 1000.0 / observer.desiredFps
+            interval: 1000.0 / (observer.desiredFps / 2)
             running: true
             repeat: true
             onTriggered: {
-                runTime = (Date.now() - lastTime);
-                lastTime = Date.now();
-                game_objects.updateGameObjects(runTime);
-                // console.log("RunTime:", runTime);
+                game_objects.updateBallModel();
             }
+        }
+        RobotInfo {
+            id: blue
+            num: observer.blueRobotCount
+            lightRobotMode: observer.lightBlueRobotMode
+            colorHeight: 0.15
+            poses: [
+                Qt.vector4d(500, 0, 2000, -90),
+                Qt.vector4d(750, 0, 2000, -90),
+                Qt.vector4d(750, 0, 3000, -90),
+                Qt.vector4d(2000, 0, 1500, -90),
+                Qt.vector4d(2000, 0, 1800, -90),
+                Qt.vector4d(3500, 0, 2000, -90),
+                Qt.vector4d(3500, 0, 4000, -90),
+                Qt.vector4d(3500, 0, 4500, -90),
+                Qt.vector4d(5000, 0, 3500, -90),
+                Qt.vector4d(5000, 0, 3000, -90),
+                Qt.vector4d(6000, 0, 0, -90),
+            ]
+        }
+        RobotInfo {
+            id: yellow
+            num: observer.yellowRobotCount
+            lightRobotMode: observer.lightYellowRobotMode
+            colorHeight: 0.15
+            poses: [
+                Qt.vector4d(-500, 0, -2000, 90),
+                Qt.vector4d(-750, 0, -2000, 90),
+                Qt.vector4d(-750, 0, -3000, 90),
+                Qt.vector4d(-2000, 0, -1500, 90),
+                Qt.vector4d(-2000, 0, -1800, 90),
+                Qt.vector4d(-3500, 0, -2000, 90),
+                Qt.vector4d(-3500, 0, -4000, 90),
+                Qt.vector4d(-3500, 0, -4500, 90),
+                Qt.vector4d(-5000, 0, -3500, 90),
+                Qt.vector4d(-5000, 0, -3000, 90),
+                Qt.vector4d(-6000, 0, 0, 90),
+            ]
         }
         Keys.onPressed: (event) => {
             event.accepted = true;
@@ -127,32 +161,114 @@ Window {
                     font.pixelSize: 15
                     color: "white"
                     horizontalAlignment: Text.AlignLeft
-                    text: "FPS: " +  Math.round(1000.0 / runTime)
+                    text: "FPS: " +  Math.round(1000.0 / showRunTime)
                     opacity: 0.7
+                }
+
+                Item {
+                    id: bBotStatus
+                    Repeater {
+                        model: blue.num
+                        Rectangle {
+                            width: 19
+                            height: 4
+                            color: "transparent"
+                            border.color: "#59baf5"
+                            opacity: 0.5
+                            radius: 1
+                        }
+                    }
+                }
+                Item {
+                    id: bBotBar
+                    Repeater {
+                        model: blue.num
+                        Rectangle {
+                            width: 0
+                            height: 3
+                            color: "#59baf5"
+                            opacity: 0.5
+                            radius: 1
+                        }
+                    }
+                }
+                Item {
+                    id: bBotIDRect
+                    Repeater {
+                        model: blue.num
+                        Rectangle {
+                            width: 6
+                            height: 6
+                            color: "#59baf5"
+                            opacity: 0.5
+                            radius: 1
+                        }
+                    }
                 }
                 Item {
                     id: bBotIDTexts
                     Repeater {
-                        model: observer.blueRobotCount
+                        model: blue.num
                         Text {
                             horizontalAlignment: Text.AlignLeft
-                            font.pixelSize: 11
-                            color: "#59baf5"
+                            font.pixelSize: 6
+                            color: "#FFFFFF"
                             text: index
+                        }
+                    }
+                }
+                Item {
+                    id: yBotStatus
+                    Repeater {
+                        model: yellow.num
+                        Rectangle {
+                            width: 19
+                            height: 4
+                            color: "transparent"
+                            border.color: "yellow"
+                            opacity: 0.5
+                            radius: 1
+                        }
+                    }
+                }
+                Item {
+                    id: yBotBar
+                    Repeater {
+                        model: yellow.num
+                        Rectangle {
+                            width: 0
+                            height: 3
+                            color: "yellow"
+                            opacity: 0.5
+                            radius: 1
+                        }
+                    }
+                }
+                Item {
+                    id: yBotIDRect
+                    Repeater {
+                        model: yellow.num
+                        Rectangle {
+                            width: 6
+                            height: 6
+                            color: "yellow"
+                            opacity: 0.5
                         }
                     }
                 }
                 Item {
                     id: yBotIDTexts
                     Repeater {
-                        model: observer.yellowRobotCount
+                        model: yellow.num
                         Text {
-                            font.pixelSize: 11
-                            color: "yellow"
+                            horizontalAlignment: Text.AlignLeft
+                            font.pixelSize: 6
+                            color: "#FFFFFF"
                             text: index
                         }
                     }
                 }
+
                 Node {
                     id: originNode
                     PerspectiveCamera {
@@ -164,7 +280,9 @@ Window {
                         eulerRotation: Qt.vector3d(-47, 0, 0)
                     }
                 }
-
+                View {
+                    id: view
+                }
                 MouseArea {
                     id: mouseArea
                     anchors.fill: parent
@@ -271,9 +389,7 @@ Window {
                         property var windowHeight : window.height
                         property var visionMulticastPort: observer.visionMulticastPort
                     }
-                    View {
-                        id: view
-                    }
+
                 }
                 Node {
                     id: node
@@ -292,7 +408,6 @@ Window {
                         property var bBotIDTexts: bBotIDTexts
                         property var yBotIDTexts: yBotIDTexts
                     }
-                    
                 }
             }
         }
@@ -301,8 +416,12 @@ Window {
         target: observer
         function onSettingChanged() {
             window.width = observer.windowWidth
-            window.height = observer.windowHeight
-
+            window.height = observer.windowHeight   
+        }
+        function onUpdateSimulationSignal() {
+            runTime = (Date.now() - lastTime);
+            lastTime = Date.now();
+            game_objects.updateGameObjects(runTime);  
         }
     }
     onSelectedCameraChanged: {
@@ -316,12 +435,15 @@ Window {
             }
         }
     }
+
     onWidthChanged: {
         observer.windowWidth = width;
         windowWidth = width;
+        view.visible = (width >= 1100);
     }
     onHeightChanged: {
         observer.windowHeight = height;
         windowHeight = height;
+        view.visible = (height >= 600);
     }
 }

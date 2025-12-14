@@ -19,7 +19,8 @@ Item {
         id: displayItems
         ListElement { name: "Width"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 1100; MaxValue: 2560 }
         ListElement { name: "Height"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 720; MaxValue: 1240 }
-        ListElement { name: "Force Debug Draw"; detail: "This property enables drawing \nof all active shapes in the physics world"; slider: false; toggle: true; combo: false; InitValue: 0 }
+        ListElement { name: "Force Debug Draw"; detail: "Enable drawing of all active shapes"; slider: false; toggle: true; combo: false; InitValue: 0 }
+        ListElement { name: "Thread Numner"; detail: "Number of threads (-1 for auto)"; slider: false; toggle: false; combo: false; InitValue: -1  }
     }
     ListModel {
         id: physicsItems
@@ -50,26 +51,26 @@ Item {
     }
     ListModel {
         id: cameraItems
-        ListElement { name: "Main Camera"; detail: "Switch to one of the cameras"; slider: false; toggle: false; combo: true; InitValue: 0; MaxValue: -1 }
-        // ListElement { name: "Overview Camera Position"; detail: ""; slider: false; toggle: false; combo: false; InitValue: 0; MaxValue: -1; InitString: "0, 10, 20" }
+        ListElement { name: "Main Camera"; detail: "Switch to one of the cameras"; slider: false; toggle: false; combo: true; InitValue: 0; MaxValue: -2 }
+        // ListElement { name: "Overview Camera Position"; detail: ""; slider: false; toggle: false; combo: false; InitValue: 0; MaxValue: -2; InitString: "0, 10, 20" }
         // ListElement { name: "Overview Camera Distance"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 10; MaxValue: 20 }
         // ListElement { name: "Overview Camera Height"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 5; MaxValue: 10 }
         // ListElement { name: "Overview Camera Angle"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 30; MaxValue: 60 }
     }
     ListModel {
         id: lightItems
-        ListElement { name: "Blue Robot"; detail: "Light mode for blue team robots"; slider: false; toggle: true; combo: false; InitValue: 0; MaxValue: -1 }
-        ListElement { name: "Yellow Robot"; detail: "Light mode for yellow team robots"; slider: false; toggle: true; combo: false; InitValue: 0; MaxValue: -1 }
-        ListElement { name: "Stadium"; detail: "Light mode for stadium"; slider: false; toggle: true; combo: false; InitValue: 0; MaxValue: -1 }
-        ListElement { name: "Field"; detail: "Light mode for field"; slider: false; toggle: true; combo: false; InitValue: 0; MaxValue: -1 }
+        ListElement { name: "Blue Robot"; detail: "Light mode for blue team robots"; slider: false; toggle: true; combo: false; InitValue: 0; MaxValue: -2 }
+        ListElement { name: "Yellow Robot"; detail: "Light mode for yellow team robots"; slider: false; toggle: true; combo: false; InitValue: 0; MaxValue: -2 }
+        ListElement { name: "Stadium"; detail: "Light mode for stadium"; slider: false; toggle: true; combo: false; InitValue: 0; MaxValue: -2 }
+        ListElement { name: "Field"; detail: "Light mode for field"; slider: false; toggle: true; combo: false; InitValue: 0; MaxValue: -2 }
     }
     ListModel {
         id: communicationItems
-        ListElement { name: "Vision Multicast Address"; detail: "Address for vision data multicast"; slider: false; toggle: false; combo: false; InitValue: -1; MaxValue: -1; InitString: "-1" }
-        ListElement { name: "Vision Multicast Port"; detail: "Port for vision data multicast"; slider: false; toggle: false; combo: false; InitValue: 10020; MaxValue: -1 }
-        ListElement { name: "Command Listen Port"; detail: "Port for command listening"; slider: false; toggle: false; combo: false; InitValue: 20011; MaxValue: -1 }
-        ListElement { name: "Blue Control Port"; detail: "Port for blue team control"; slider: false; toggle: false; combo: false; InitValue: 30011; MaxValue: -1 }
-        ListElement { name: "Yellow Control Port"; detail: "Port for yellow team control"; slider: false; toggle: false; combo: false; InitValue: 30012; MaxValue: -1 }
+        ListElement { name: "Vision Multicast Address"; detail: "Address for vision data multicast"; slider: false; toggle: false; combo: false; InitValue: -2; MaxValue: -2; InitString: "-2" }
+        ListElement { name: "Vision Multicast Port"; detail: "Port for vision data multicast"; slider: false; toggle: false; combo: false; InitValue: 10020; MaxValue: -2 }
+        ListElement { name: "Command Listen Port"; detail: "Port for command listening"; slider: false; toggle: false; combo: false; InitValue: 20011; MaxValue: -2 }
+        ListElement { name: "Blue Control Port"; detail: "Port for blue team control"; slider: false; toggle: false; combo: false; InitValue: 30011; MaxValue: -2 }
+        ListElement { name: "Yellow Control Port"; detail: "Port for yellow team control"; slider: false; toggle: false; combo: false; InitValue: 30012; MaxValue: -2 }
     }
 
     
@@ -228,7 +229,7 @@ Item {
                     }
                     Item {
                         x: 215
-                        visible: model.InitValue === -1
+                        visible: model.InitValue === -2
                         Column {
                             spacing: 5
 
@@ -258,7 +259,7 @@ Item {
                         }
                     }
                     Item {
-                        visible: !model.slider && !model.toggle && !model.combo && model.InitValue !== -1
+                        visible: !model.slider && !model.toggle && !model.combo && model.InitValue !== -2
 
                         TextField {
                             x: 250
@@ -277,6 +278,8 @@ Item {
                                     text = observer.blueTeamControlPort.toString();
                                 } else if (model.name === "Yellow Control Port") {
                                     text = observer.yellowTeamControlPort.toString();
+                                } else if (model.name === "Thread Numner") {
+                                    text = observer.numThreads.toString();
                                 } else {
                                     text = model.InitValue.toString();
                                 }
@@ -294,6 +297,8 @@ Item {
                                         tempBlueControlPort = newValue;
                                     } else if (model.name === "Yellow Control Port") {
                                         tempYellowControlPort = newValue;
+                                    } else if (model.name === "Thread Numner") {
+                                        tempNumThreads = newValue;
                                     }
                                 } else {
                                     text = model.InitValue.toString()
