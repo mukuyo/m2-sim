@@ -4,7 +4,7 @@ import Qt3D.Render
 import Qt3D.Extras
 import QtQuick3D.Physics
 import Qt.labs.folderlistmodel
-import MOC
+import M2
 
 import "../../../assets/models/bot/Rione/viz" as BlueBody
 import "../../../assets/models/bot/Rione/rigid_body" as BlueLightBody
@@ -16,45 +16,6 @@ import "../../../assets/models/circle/ballMarker/"
 
 Node {
     id: robotNode
-
-    RobotInfo {
-        id: blue
-        num: observer.blueRobotCount
-        lightRobotMode: observer.lightBlueRobotMode
-        colorHeight: 0.15
-        poses: [
-            Qt.vector4d(500, 0, 2000, -90),
-            Qt.vector4d(750, 0, 2000, -90),
-            Qt.vector4d(750, 0, 3000, -90),
-            Qt.vector4d(2000, 0, 1500, -90),
-            Qt.vector4d(2000, 0, 1800, -90),
-            Qt.vector4d(3500, 0, 2000, -90),
-            Qt.vector4d(3500, 0, 4000, -90),
-            Qt.vector4d(3500, 0, 4500, -90),
-            Qt.vector4d(5000, 0, 3500, -90),
-            Qt.vector4d(5000, 0, 3000, -90),
-            Qt.vector4d(6000, 0, 0, -90),
-        ]
-    }
-    RobotInfo {
-        id: yellow
-        num: observer.yellowRobotCount
-        lightRobotMode: observer.lightYellowRobotMode
-        colorHeight: 0.15
-        poses: [
-            Qt.vector4d(-500, 0, -2000, 90),
-            Qt.vector4d(-750, 0, -2000, 90),
-            Qt.vector4d(-750, 0, -3000, 90),
-            Qt.vector4d(-2000, 0, -1500, 90),
-            Qt.vector4d(-2000, 0, -1800, 90),
-            Qt.vector4d(-3500, 0, -2000, 90),
-            Qt.vector4d(-3500, 0, -4000, 90),
-            Qt.vector4d(-3500, 0, -4500, 90),
-            Qt.vector4d(-5000, 0, -3500, 90),
-            Qt.vector4d(-5000, 0, -3000, 90),
-            Qt.vector4d(-6000, 0, 0, 90),
-        ]
-    }
     Sync {
         id: sync
     }
@@ -68,9 +29,11 @@ Node {
     property var isDribble: false
     property var dribbleNum: -1
     property var remBotRadianBall: 0
-    property var ballPosition: Qt.vector3d(0, 0, 0)
+    property var ballPosition: Qt.vector4d(0, 0, 0, 0)
+    property var preBallPosition: Qt.vector4d(0, 0, 0, 0)
+    property var ballVelocity: Qt.vector4d(0, 0, 0, 0)
     property var ballModelNum: 10
-    property var ballPositions: new Array(ballModelNum).fill(Qt.vector3d(0, 0, 0))
+    property var ballPositions: new Array(ballModelNum).fill(Qt.vector4d(0, 0, 0, 0))
     MotionControl {
         id: motionControl
     }
@@ -211,21 +174,7 @@ Node {
     // onBBotNumChanged: {
     //     bBotsCamera = [];
     // }
-    // Repeater3D {
-    //     id: bBotStatus
-    //     model: blue.num
-    //     Model {
-    //         source: "#Cube"
-    //         scale: Qt.vector3d(1.9, 0.2, 0.2)
-    //         position: Qt.vector3d(0, 1000, 0)
-    //         opacity: 0.6
-    //         materials: [
-    //             DefaultMaterial {
-    //                 diffuseColor: "gray"
-    //             }
-    //         ]
-    //     }
-    // }
+
     Repeater3D {
         id: yBotsFrame
         model: yellow.num
@@ -361,7 +310,7 @@ Node {
                 let frame = body.objectName.startsWith("b") ? bBotsFrame.children[id] : yBotsFrame.children[id];
                 let botDistanceBall = Math.sqrt(Math.pow(frame.position.x - ball.position.x, 2) + Math.pow(frame.position.z - ball.position.z, 2) + Math.pow(frame.position.y - ball.position.y, 2));
                 let botRadianBall = mu.normalizeRadian(Math.atan2(frame.position.z - ball.position.z, frame.position.x - ball.position.x) - Math.PI + color.poses[id].w);
-                if (botDistanceBall < 100 * Math.cos(Math.abs(botRadianBall)) && Math.abs(botRadianBall) < Math.PI/15.0 && color.spinners[id] > 0 && (color.kickspeeds[id].x == 0 && color.kickspeeds[id].y == 0 )) {
+                if (botDistanceBall < 105 * Math.cos(Math.abs(botRadianBall)) && Math.abs(botRadianBall) < Math.PI/15.0 && color.spinners[id] > 0 && (color.kickspeeds[id].x == 0 && color.kickspeeds[id].y == 0 )) {
                     color.holds[id] = true;
                     ball.reset(Qt.vector3d(100000, 0, 100000), Qt.vector3d(0, 0, 0));
                     frame.collisionShapes[5].position = Qt.vector3d(95*Math.tan(botRadianBall), 25, -95);
@@ -434,6 +383,8 @@ Node {
                 teleopVelocity = Qt.vector3d(0, 0, 0);
             }
         }
+        ballVelocity = mu.calcVelocity(ballPosition, preBallPosition, timestep);
+        preBallPosition = ballPosition;
     }
 
     function syncGameObjects() {
@@ -495,9 +446,9 @@ Node {
     function updateBallModel() {
         for (let i = ballModelNum - 1; i > 0; i--) {
             ballPositions[i] = ballPositions[i - 1];
-            ballModels.children[i].position = Qt.vector3d(ballPositions[i].x, ballPositions[i].y, ballPositions[i].z);
+            ballModels.children[i].position = Qt.vector4d(ballPositions[i].x, ballPositions[i].y, ballPositions[i].z, ballPositions[i].w);
         }
-        ballPositions[0] = Qt.vector3d(ballModels.children[0].position.x, ballModels.children[0].position.y, ballModels.children[0].position.z);
+        ballPositions[0] = Qt.vector4d(ballModels.children[0].position.x, ballModels.children[0].position.y, ballModels.children[0].position.z, ballModels.children[0].position.w);
     }
 
     Component.onCompleted: {
@@ -511,7 +462,7 @@ Node {
         }
         for (let i = 1; i < ballModelNum; i++) {
             // ballModels.children[i].children[0].materials[0].diffuseColor= "#FFFFFF";
-            ballModels.children[i].children[0].materials[0].opacity = 0;
+            ballModels.children[i].children[0].materials[0].opacity = 0.11;
         }
         ballMarker.children[0].materials[0].diffuseColor= "#EB392A";
         ballMarker.children[0].materials[0].opacity = 0.4;

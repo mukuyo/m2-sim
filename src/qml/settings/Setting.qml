@@ -36,6 +36,7 @@ Item {
     property real tempGoalDepth: 0
     property real tempPenaltyAreaWidth: 0
     property real tempPenaltyAreaDepth: 0
+    property int tempNumThreads: observer.numThreads
     // property real tempFieldWidth: observer.fieldWidth
     // property real tempFieldHeight: observer.fieldHeight
     // property real tempLineThickness: observer.lineThickness
@@ -51,7 +52,7 @@ Item {
 
     ListModel {
         id: menuModel
-        ListElement { label: "Display"; expandValue: 62; heightValue: 190 }
+        ListElement { label: "Display"; expandValue: 62; heightValue: 240 }
         ListElement { label: "Physics"; expandValue: 65; heightValue: 450 }
         ListElement { label: "Geometry"; expandValue: 85; heightValue: 190 }
         ListElement { label: "Robots"; expandValue: 60; heightValue: 190 }
@@ -170,6 +171,7 @@ Item {
                     observer.ballStaticFriction = tempBallStaticFriction;
                     observer.ballDynamicFriction = tempBallDynamicFriction;
                     observer.ballRestitution = tempBallRestitution;
+                    observer.numThreads = tempNumThreads;
                     // observer.lineThickness = tempLineThickness;
                     // observer.goalWidth = tempGoalWidth;
                     // observer.goalHeight = tempGoalHeight;

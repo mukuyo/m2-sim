@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(m2-sim)
+project(Moccer-Sim)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -87,10 +87,10 @@ include_directories(${SRC_DIR})
 qt6_wrap_cpp(MOC_SRCS ${HEADERS})
 
 # 実行ファイルの設定
-add_executable(m2-sim main.cpp ${SOURCES} ${MOC_SRCS} ${PROTO_SRCS})
+add_executable(Moccer-Sim main.cpp ${SOURCES} ${MOC_SRCS} ${PROTO_SRCS})
 
 # ライブラリのリンク
-target_link_libraries(m2-sim
+target_link_libraries(Moccer-Sim
     Qt6::Core 
     Qt6::Gui
     Qt6::Widgets 
@@ -106,22 +106,22 @@ target_link_libraries(m2-sim
 )
 
 # 実行時ディレクトリの設定
-set_target_properties(m2-sim PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set_target_properties(Moccer-Sim PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Custom 'run' target
 add_custom_target(run
-    COMMAND ${CMAKE_BINARY_DIR}/bin/m2-sim
-    DEPENDS m2-sim
+    COMMAND ${CMAKE_BINARY_DIR}/bin/Moccer-Sim
+    DEPENDS Moccer-Sim
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
 # インストール対象: 実行ファイル
-install(TARGETS m2-sim
+install(TARGETS Moccer-Sim
     RUNTIME DESTINATION bin
 )
 
 # インストール対象: ヘッダーファイル（必要に応じて）
 install(DIRECTORY ${SRC_DIR}/
-    DESTINATION include/m2-sim
+    DESTINATION include/moccer-sim
     FILES_MATCHING PATTERN "*.h"
 )

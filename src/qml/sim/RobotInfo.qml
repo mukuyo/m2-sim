@@ -4,7 +4,7 @@ import Qt3D.Render
 import Qt3D.Extras
 import QtQuick3D.Physics
 import Qt.labs.folderlistmodel
-import MOC
+import M2
 
 import "../../../assets/models/bot/Rione/viz" as BlueBody
 import "../../../assets/models/bot/Rione/rigid_body" as BlueLightBody

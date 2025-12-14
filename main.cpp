@@ -10,10 +10,10 @@
 class m2sim {
 public:
     explicit m2sim(QQmlApplicationEngine &engine) {
-        qmlRegisterType<Observer>("MOC", 1, 0, "Observe");
-        qmlRegisterType<Camera>("MOC", 1, 0, "Camera");
-        qmlRegisterType<MotionControl>("MOC", 1, 0, "MotionControl");
-        qmlRegisterType<MathUtils>("MOC", 1, 0, "MathUtils");
+        qmlRegisterType<Observer>("M2", 1, 0, "Observe");
+        qmlRegisterType<Camera>("M2", 1, 0, "Camera");
+        qmlRegisterType<MotionControl>("M2", 1, 0, "MotionControl");
+        qmlRegisterType<MathUtils>("M2", 1, 0, "MathUtils");
         engine.load(QUrl(QStringLiteral("../src/qml/Main.qml")));
     }
 };

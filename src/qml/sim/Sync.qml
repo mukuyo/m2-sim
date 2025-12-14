@@ -23,9 +23,9 @@ QtObject {
                 botDistanceBall = 95;
                 botRadianBall = remBotRadianBall;
             }
-            if (botDistanceBall < 100 * Math.cos(Math.abs(botRadianBall)) && Math.abs(botRadianBall) < Math.PI/15.0 && color.spinners[i] > 0) {
+            if (botDistanceBall < 105 * Math.cos(Math.abs(botRadianBall)) && Math.abs(botRadianBall) < Math.PI/15.0 && color.spinners[i] > 0) {
                 remBotRadianBall = botRadianBall;
-                ballPosition = Qt.vector3d(frame.position.x + (95 * Math.cos(-color.poses[i].w + botRadianBall)), 25, (frame.position.z + (95 * Math.sin(-color.poses[i].w + botRadianBall))));
+                ballPosition = Qt.vector4d(frame.position.x + (95 * Math.cos(-color.poses[i].w + botRadianBall)), 25, (frame.position.z + (95 * Math.sin(-color.poses[i].w + botRadianBall))), 0);
             } else if (color.holds[i]) {
                 color.holds[i] = false;
                 frame.collisionShapes[5].position = Qt.vector3d(0, 5000, 0);
@@ -35,18 +35,23 @@ QtObject {
                 }
             }
             sync.updateID(color, frame, i, botIDTexts, botStatus, botIDRect, botBar);
-            // sync.updateCamera(color, frame, i, bot, color.radians[i], isYellow);
+            sync.updateCamera(color, frame, i, isYellow);
         }
         return { positions: botPositions, ballContacts: color.holds, pixels: botPixelBalls, cameraExists: color.cameraExists };
     }
     function updateBall() {
         if (ball.position.x < 50000) {
             ballModels.children[0].position = Qt.vector3d(ball.position.x, ball.position.y, ball.position.z);
-            ballPosition = Qt.vector3d(ball.position.x, ball.position.y, ball.position.z);
+            ballPosition = Qt.vector4d(ball.position.x, ball.position.y, ball.position.z, 0);
         } else {
             ballModels.children[0].position = Qt.vector3d(ballPosition.x, ballPosition.y, ballPosition.z);
         }
+        let frame2D = camera.projectToScreen(
+            Qt.vector3d(ballPosition.x-15, ballPosition.y + 128, ballPosition.z-86.5), overviewCamera.position, overviewCamera.forward, overviewCamera.up, window.width, window.height, overviewCamera.fieldOfView, 1.0, 20000
+        );
+
         ballMarker.position = Qt.vector3d(ballPosition.x, 5, ballPosition.z);
+
     }
 
     function kick(color, frame, i, radian) {
@@ -90,20 +95,16 @@ QtObject {
         botBar.children[i].y = frame2D.y - 9;
         botBar.children[i].width = Math.sqrt(Math.pow(color.velNormals[i], 2) + Math.pow(color.velTangents[i], 2)) * 0.003;
     }
-    function updateCamera(color, frame, i, bot, radian, isYellow) {
-        let cameraPosition = Qt.vector3d(-70*Math.sin(radian)+frame.position.x, color.cameras[i].position.y + frame.position.y, -70*Math.cos(radian)+frame.position.z);
+    function updateCamera(color, frame, i, isYellow) {
+        let cameraPosition = Qt.vector3d(-70*Math.sin(color.poses[i].w)+frame.position.x, color.cameras[i].position.y + frame.position.y, -70*Math.cos(color.poses[i].w)+frame.position.z);
         let tempBallPixel = camera.getBallPosition(ball.position, cameraPosition, color.cameras[i].forward, color.cameras[i].up, 640, 480, 60);
+
         if (tempBallPixel.x !=-1 && tempBallPixel.y != -1) {
             botPixelBalls[i] = tempBallPixel;
             botCameraExists[i] = true;
         } else {
             color.cameraExists[i] = false;
         }
-        color.position2Ds[i] = Qt.vector2d(bot.position.x, bot.position.z);
-        if (!isYellow) {
-            bBot2DPositions = bBot2DPositions
-        } else {
-            yBot2DPositions = yBot2DPositions
-        }
+        color.position2Ds[i] = Qt.vector2d(frame.position.x, frame.position.z);
     }
 }

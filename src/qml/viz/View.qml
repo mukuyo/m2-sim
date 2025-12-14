@@ -5,13 +5,16 @@ import QtQuick.Controls
 
 Item {
     id: view
-    width: windowWidth
-    height: windowHeight
+    property int viewWindowWidth: 1100
+    property int viewWindowHeight: 800
+
+    width: viewWindowWidth
+    height: viewWindowHeight
 
     property real opacityValue: 0.8
-    property int dispX: windowWidth / 2 - (windowWidth / 8)
+    property int dispX: windowWidth / 2 - (viewWindowWidth / 8)
     property int dispY: windowHeight - 240
-    property int dispWidth: windowWidth / 4
+    property int dispWidth: viewWindowWidth / 4
     property int dispHeight: dispWidth / 4.0 * 3.0
 
     property var cornerRects: [

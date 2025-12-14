@@ -7,6 +7,7 @@
 #include <QHostAddress>
 #include <QSettings>
 #include <QTimer>
+#include <QElapsedTimer>
 #include <iostream>
 #include "networks/receiver.h"
 #include "networks/sender.h"
@@ -40,6 +41,7 @@ class Observer : public QObject {
     Q_PROPERTY(float gravity READ getGravity WRITE setGravity NOTIFY settingChanged)
     Q_PROPERTY(float desiredFps READ getDesiredFps WRITE setDesiredFps NOTIFY settingChanged)
     Q_PROPERTY(bool ccdMode READ getCcdMode WRITE setCcdMode NOTIFY settingChanged)
+    Q_PROPERTY(int numThreads READ getNumThreads WRITE setNumThreads NOTIFY settingChanged)
     // Q_PROPERTY(int fieldWidth READ getFieldWidth WRITE setFieldWidth NOTIFY settingChanged)
     // Q_PROPERTY(int fieldHeight READ getFieldHeight WRITE setFieldHeight NOTIFY settingChanged)
     // Q_PROPERTY(int lineThickness READ getLineThickness WRITE setLineThickness NOTIFY settingChanged)
@@ -110,6 +112,7 @@ public:
     float getGravity() const { return gravity; }
     float getDesiredFps() const { return desiredFps; }
     bool getCcdMode() const { return ccdMode; }
+    int getNumThreads() const { return numThreads; }
     
     void setWindowWidth(int width);
     void setWindowHeight(int height);
@@ -131,6 +134,8 @@ public:
     void setGravity(float gravity);
     void setDesiredFps(float fps);
     void setCcdMode(bool mode);
+    void setNumThreads(int threads);
+    void updateSimulator();
     
 signals:
     void blueRobotsChanged();
@@ -145,6 +150,7 @@ signals:
         const QList<QVector2D> &yBallCameraPositions
     );
     void updateSenderData(QVector3D ball, QList<QVector3D> blue, QList<QVector3D> yellow);
+    void updateSimulationSignal();
 
 private:
     QSettings config;
@@ -161,6 +167,7 @@ private:
 
     int windowWidth;
     int windowHeight;
+    int numThreads;
 
     QString visionMulticastAddress;
     int visionMulticastPort;
@@ -193,6 +200,9 @@ private:
     QElapsedTimer elapsedTimer;
     QTimer *loopTimer;
     float frameInterval;
+    QElapsedTimer elapsed;
+    qint64 prevTimeMs;
+    double fps;
 };
 
 #endif // OBSERVER_H
