@@ -33,6 +33,7 @@ Node {
     property var preBallPosition: Qt.vector4d(0, 0, 0, 0)
     property var ballVelocity: Qt.vector4d(0, 0, 0, 0)
     property var ballModelNum: 10
+    property var ballReset: false
     property var ballPositions: new Array(ballModelNum).fill(Qt.vector4d(0, 0, 0, 0))
     MotionControl {
         id: motionControl
@@ -296,6 +297,7 @@ Node {
         mass: 0.043
         position: Qt.vector3d(0, 500, 0)
         receiveContactReports: true
+        sendContactReports: true
         physicsMaterial: ballMaterial
         collisionShapes: [
             ConvexMeshShape {
@@ -310,10 +312,9 @@ Node {
                 let frame = body.objectName.startsWith("b") ? bBotsFrame.children[id] : yBotsFrame.children[id];
                 let botDistanceBall = Math.sqrt(Math.pow(frame.position.x - ball.position.x, 2) + Math.pow(frame.position.z - ball.position.z, 2) + Math.pow(frame.position.y - ball.position.y, 2));
                 let botRadianBall = mu.normalizeRadian(Math.atan2(frame.position.z - ball.position.z, frame.position.x - ball.position.x) - Math.PI + color.poses[id].w);
-                if (botDistanceBall < 105 * Math.cos(Math.abs(botRadianBall)) && Math.abs(botRadianBall) < Math.PI/15.0 && color.spinners[id] > 0 && (color.kickspeeds[id].x == 0 && color.kickspeeds[id].y == 0 )) {
+                
+                if (dribbleNum == -1 && Math.abs(botRadianBall) < Math.PI/15.0) {
                     color.holds[id] = true;
-                    ball.reset(Qt.vector3d(100000, 0, 100000), Qt.vector3d(0, 0, 0));
-                    frame.collisionShapes[5].position = Qt.vector3d(95*Math.tan(botRadianBall), 25, -95);
                     dribbleNum = body.objectName.startsWith("b") ? id : id + 10;
                 }
             }
@@ -365,11 +366,10 @@ Node {
     function updateGameObjects(timestep) 
     {
         isDribble = false;
-        prepare_kick_flag = false;
+        ballReset = true;
         
         botMovement(blue, timestep);
         botMovement(yellow, timestep, true);
-
         if(!isDribble){
             kick_flag = false;
         }

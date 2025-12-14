@@ -54,6 +54,8 @@ Node {
     }
     StaticRigidBody {
         id: topWallSecret
+        objectName: "topWallSecret"
+        sendContactReports: true
         position: Qt.vector3d(0, 50, -5310)
         scale: Qt.vector3d(126.2, 3, 10)
         physicsMaterial: physicsMaterial
@@ -136,15 +138,27 @@ Node {
     }
     StaticRigidBody {
         id: rightGoalSecret
-        position: Qt.vector3d(6490, 50, 0)
+        objectName: "rightGoalSecret"
+        receiveContactReports: true
+        position: Qt.vector3d(6480, 50, 0)
         scale: Qt.vector3d(18.4, 3, 6.2)
         eulerRotation: Qt.vector3d(0, -90, 0)
         physicsMaterial: physicsMaterial
         collisionShapes: BoxShape {}
+        
+        onBodyContact: (body, positions, impulses, normals) => {
+            if (body.objectName == "ball") {
+                
+                ballCollisionMarker.position = Qt.vector3d(6170, positions[0].y, positions[0].z);
+                ballCollisionMarker.eulerRotation = Qt.vector3d(-90, -90, 0) 
+            }
+        }
     }
 
     StaticRigidBody {
         id: rightGoalTop
+        objectName: "rightGoalTop"
+        receiveContactReports: true
         position: Qt.vector3d(6090, 50, -910)
         scale: Qt.vector3d(1.8, 3, 0.2)
         physicsMaterial: physicsMaterial
@@ -157,10 +171,18 @@ Node {
                 }
             ]
         }
+        onBodyContact: (body, positions, impulses, normals) => {
+            if (body.objectName == "ball") {
+                ballCollisionMarker.position = Qt.vector3d(positions[0].x, positions[0].y, -900);
+                ballCollisionMarker.eulerRotation = Qt.vector3d(-90, 0, 0) 
+            }
+        }
     }
 
     StaticRigidBody {
         id: rightGoalBottom
+        objectName: "rightGoalBottom"
+        receiveContactReports: true
         position: Qt.vector3d(6090, 50, 910)
         scale: Qt.vector3d(1.8, 3, 0.2)
         physicsMaterial: physicsMaterial
@@ -172,6 +194,12 @@ Node {
                     diffuseColor: "black"
                 }
             ]
+        }
+        onBodyContact: (body, positions, impulses, normals) => {
+            if (body.objectName == "ball") {
+                ballCollisionMarker.position = Qt.vector3d(positions[0].x, positions[0].y, 900);
+                ballCollisionMarker.eulerRotation = Qt.vector3d(-90, 0, 0) 
+            }
         }
     }
 
@@ -189,15 +217,25 @@ Node {
     }
     StaticRigidBody {
         id: leftGoalSecret
-        position: Qt.vector3d(-6490, 50, 0)
+        objectName: "leftGoalSecret"
+        receiveContactReports: true
+        position: Qt.vector3d(-6480, 50, 0)
         scale: Qt.vector3d(18.4, 3, 6.2)
         eulerRotation: Qt.vector3d(0, 90, 0)
         physicsMaterial: physicsMaterial
         collisionShapes: BoxShape {}
+        onBodyContact: (body, positions, impulses, normals) => {
+            if (body.objectName == "ball") {
+                ballCollisionMarker.position = Qt.vector3d(-6170, positions[0].y, positions[0].z);
+                ballCollisionMarker.eulerRotation = Qt.vector3d(-90, 90, 0) 
+            }
+        }
     }
 
     StaticRigidBody {
         id: leftGoalTop
+        objectName: "leftGoalTop"
+        receiveContactReports: true
         position: Qt.vector3d(-6090, 50, -910)
         scale: Qt.vector3d(1.8, 3, 0.2)
         physicsMaterial: physicsMaterial
@@ -210,10 +248,18 @@ Node {
                 }
             ]
         }
+        onBodyContact: (body, positions, impulses, normals) => {
+            if (body.objectName == "ball") {
+                ballCollisionMarker.position = Qt.vector3d(positions[0].x, positions[0].y, -900);
+                ballCollisionMarker.eulerRotation = Qt.vector3d(-90, 0, 0) 
+            }
+        }
     }
 
     StaticRigidBody {
         id: leftGoalBottom
+        objectName: "leftGoalBottom"
+        receiveContactReports: true
         position: Qt.vector3d(-6090, 50, 910)
         scale: Qt.vector3d(1.8, 3, 0.2)
         physicsMaterial: physicsMaterial
@@ -225,6 +271,12 @@ Node {
                     diffuseColor: "black"
                 }
             ]
+        }
+        onBodyContact: (body, positions, impulses, normals) => {
+            if (body.objectName == "ball") {
+                ballCollisionMarker.position = Qt.vector3d(positions[0].x, positions[0].y, 900);
+                ballCollisionMarker.eulerRotation = Qt.vector3d(-90, 0, 0) 
+            }
         }
     }
 
@@ -386,5 +438,18 @@ Node {
     LineCircle {
         position: Qt.vector3d(0, 4, 0)
         eulerRotation: Qt.vector3d(90, 0, 0)
+    }
+    Model {
+        id: ballCollisionMarker
+        source: "#Cylinder"
+        scale: Qt.vector3d(0.4, 0.05, 0.4)
+        eulerRotation: Qt.vector3d(-90, -90, 0)
+        position: Qt.vector3d(0, 10000, 0)
+        opacity: 1.0
+        materials: [
+            DefaultMaterial {
+                diffuseColor: "#ED752F"
+            }
+        ]
     }
 }

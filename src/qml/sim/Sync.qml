@@ -10,8 +10,8 @@ QtObject {
         let botBar = isYellow ? yBotBar : bBotBar;
 
         let botPositions = []
-        let botBallContacts = []
         let ballPixels = []
+        
 
         for (let i = 0; i < color.num; i++) {
             let frame = botFrame.children[i];
@@ -22,17 +22,34 @@ QtObject {
             if (dribbleNum == (i + (isYellow ? 10 : 0))) {
                 botDistanceBall = 95;
                 botRadianBall = remBotRadianBall;
-            }
-            if (botDistanceBall < 105 * Math.cos(Math.abs(botRadianBall)) && Math.abs(botRadianBall) < Math.PI/15.0 && color.spinners[i] > 0) {
-                remBotRadianBall = botRadianBall;
                 ballPosition = Qt.vector4d(frame.position.x + (95 * Math.cos(-color.poses[i].w + botRadianBall)), 25, (frame.position.z + (95 * Math.sin(-color.poses[i].w + botRadianBall))), 0);
-            } else if (color.holds[i]) {
-                color.holds[i] = false;
-                frame.collisionShapes[5].position = Qt.vector3d(0, 5000, 0);
-                if (dribbleNum == (i + (isYellow ? 10 : 0))) {
+            }
+            // if (botDistanceBall < 105 * Math.cos(Math.abs(botRadianBall)) && Math.abs(botRadianBall) < Math.PI/15.0 && color.spinners[i] > 0) {
+            //     remBotRadianBall = botRadianBall;
+                
+            // } else if (color.holds[i]) {
+            //     color.holds[i] = false;
+            //     frame.collisionShapes[5].position = Qt.vector3d(0, 5000, 0);
+            //     if (dribbleNum == (i + (isYellow ? 10 : 0))) {
+            //         ball.reset(Qt.vector3d(ballPosition.x, ballPosition.y, ballPosition.z), Qt.vector3d(0, 0, 0));
+            //         dribbleNum = -1;
+            //     }
+            //     console.log("Release Bot " + (i + (isYellow ? 10 : 0)) + " hold the ball.");
+            // }
+            if (color.holds[i]) {
+                if (color.spinners[i] > 0 && (color.kickspeeds[i].x == 0 && color.kickspeeds[i].y == 0 )) {
+                    ball.reset(Qt.vector3d(100000, 0, 100000), Qt.vector3d(0, 0, 0));
+                    frame.collisionShapes[5].position = Qt.vector3d(95*Math.tan(botRadianBall), 25, -95);
+                } 
+                if (!(botDistanceBall < 105 * Math.cos(Math.abs(botRadianBall)) && Math.abs(botRadianBall) < Math.PI/15.0 && color.spinners[i] > 0)) {
+                    color.holds[i] = false;
+                    frame.collisionShapes[5].position = Qt.vector3d(0, 5000, 0);
                     ball.reset(Qt.vector3d(ballPosition.x, ballPosition.y, ballPosition.z), Qt.vector3d(0, 0, 0));
                     dribbleNum = -1;
                 }
+            }
+            if (frame.collisionShapes[5].position.y != 5000) {
+                ballReset = false;
             }
             sync.updateID(color, frame, i, botIDTexts, botStatus, botIDRect, botBar);
             sync.updateCamera(color, frame, i, isYellow);
@@ -43,19 +60,17 @@ QtObject {
         if (ball.position.x < 50000) {
             ballModels.children[0].position = Qt.vector3d(ball.position.x, ball.position.y, ball.position.z);
             ballPosition = Qt.vector4d(ball.position.x, ball.position.y, ball.position.z, 0);
+            ballModels.children[0].children[0].materials[0].diffuseColor= "orange";
         } else {
             ballModels.children[0].position = Qt.vector3d(ballPosition.x, ballPosition.y, ballPosition.z);
+            ballModels.children[0].children[0].materials[0].diffuseColor= "#EB392A";
         }
-        let frame2D = camera.projectToScreen(
-            Qt.vector3d(ballPosition.x-15, ballPosition.y + 128, ballPosition.z-86.5), overviewCamera.position, overviewCamera.forward, overviewCamera.up, window.width, window.height, overviewCamera.fieldOfView, 1.0, 20000
-        );
-
         ballMarker.position = Qt.vector3d(ballPosition.x, 5, ballPosition.z);
-
     }
 
     function kick(color, frame, i, radian) {
         color.holds[i] = false;
+        dribbleNum = -1;
         frame.collisionShapes[5].position = Qt.vector3d(0, 5000, 0);
         if (ball.position.x > 50000) {
             ball.reset(Qt.vector3d(frame.position.x + (95 * Math.cos(-radian)), 25, (frame.position.z + (95 * Math.sin(-radian)))), Qt.vector3d(0, 0, 0));
