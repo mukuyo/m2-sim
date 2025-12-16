@@ -52,8 +52,9 @@ Window {
             numThreads: observer.numThreads
             forceDebugDraw: observer.forceDebugDrawMode
             onFrameDone: (timestep) => {
-                game_objects.syncGameObjects();
-                showRunTime = runTime;
+                game_objects.updateGameObjects(runTime);
+                // game_objects.syncGameObjects();
+                // showRunTime = runTime;
             }
         }
         Timer {
@@ -419,9 +420,10 @@ Window {
             window.height = observer.windowHeight   
         }
         function onUpdateSimulationSignal() {
+            game_objects.syncGameObjects();
             runTime = (Date.now() - lastTime);
             lastTime = Date.now();
-            game_objects.updateGameObjects(runTime);  
+            showRunTime = runTime;
         }
     }
     onSelectedCameraChanged: {
