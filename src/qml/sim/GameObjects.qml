@@ -450,11 +450,11 @@ Node {
     Component.onCompleted: {
         for (let i = 0; i < observer.blueRobotCount; i++) {
             let frame = bBotsFrame.children[i];
-            frame.reset(Qt.vector3d(frame.position.x, 0, frame.position.z), Qt.vector3d(0, -90, 0));
+            frame.reset(Qt.vector3d(frame.position.x, 0, frame.position.z), Qt.vector3d(0, blue.poses[i].w, 0));
         }
         for (let i = 0; i < observer.yellowRobotCount; i++) {
             let frame = yBotsFrame.children[i];
-            frame.reset(Qt.vector3d(frame.position.x, 0, frame.position.z), Qt.vector3d(0, 90, 0));
+            frame.reset(Qt.vector3d(frame.position.x, 0, frame.position.z), Qt.vector3d(0, yellow.poses[i].w, 0));
         }
         for (let i = 1; i < ballModelNum; i++) {
             ballModels.children[i].children[0].materials[0].opacity = 0.11;

@@ -71,17 +71,19 @@ Window {
             lightRobotMode: observer.lightBlueRobotMode
             colorHeight: 0.15
             poses: [
-                Qt.vector4d(500, 0, 2000, -90),
-                Qt.vector4d(750, 0, 2000, -90),
-                Qt.vector4d(750, 0, 3000, -90),
-                Qt.vector4d(2000, 0, 1500, -90),
-                Qt.vector4d(2000, 0, 1800, -90),
-                Qt.vector4d(3500, 0, 2000, -90),
-                Qt.vector4d(3500, 0, 4000, -90),
-                Qt.vector4d(3500, 0, 4500, -90),
-                Qt.vector4d(5000, 0, 3500, -90),
-                Qt.vector4d(5000, 0, 3000, -90),
-                Qt.vector4d(6000, 0, 0, -90),
+                Qt.vector4d(6000, 0, 0, 90),
+                Qt.vector4d(500, 0, 0, 90),
+                Qt.vector4d(950, 0, 2000, 90),
+                Qt.vector4d(950, 0, -2000, 90),
+                Qt.vector4d(2000, 0, 1500, 90),
+                Qt.vector4d(2000, 0, -1500, 90),
+                Qt.vector4d(4000, 0, 0, 90),
+                Qt.vector4d(4000, 0, 1000, 90),
+                Qt.vector4d(4000, 0, -1000, 90),
+                Qt.vector4d(3000, 0, 3500, 90),
+                Qt.vector4d(3000, 0, -3500, 90),
+                Qt.vector4d(4000, 0, 2000, 90),
+                Qt.vector4d(4000, 0, -2000, 90),
             ]
         }
         RobotInfo {
@@ -90,17 +92,19 @@ Window {
             lightRobotMode: observer.lightYellowRobotMode
             colorHeight: 0.15
             poses: [
-                Qt.vector4d(-500, 0, -2000, 90),
-                Qt.vector4d(-750, 0, -2000, 90),
-                Qt.vector4d(-750, 0, -3000, 90),
-                Qt.vector4d(-2000, 0, -1500, 90),
-                Qt.vector4d(-2000, 0, -1800, 90),
-                Qt.vector4d(-3500, 0, -2000, 90),
-                Qt.vector4d(-3500, 0, -4000, 90),
-                Qt.vector4d(-3500, 0, -4500, 90),
-                Qt.vector4d(-5000, 0, -3500, 90),
-                Qt.vector4d(-5000, 0, -3000, 90),
-                Qt.vector4d(-6000, 0, 0, 90),
+                Qt.vector4d(-6000, 0, 0, -90),
+                Qt.vector4d(-500, 0, 0, -90),
+                Qt.vector4d(-950, 0, 2000, -90),
+                Qt.vector4d(-950, 0, -2000, -90),
+                Qt.vector4d(-2000, 0, 1500, -90),
+                Qt.vector4d(-2000, 0, -1500, -90),
+                Qt.vector4d(-4000, 0, 0, -90),
+                Qt.vector4d(-4000, 0, 1000, -90),
+                Qt.vector4d(-4000, 0, -1000, -90),
+                Qt.vector4d(-3000, 0, 3500, -90),
+                Qt.vector4d(-3000, 0, -3500, -90),
+                Qt.vector4d(-4000, 0, 2000, -90),
+                Qt.vector4d(-4000, 0, -2000, -90),
             ]
         }
         Keys.onPressed: (event) => {

@@ -64,10 +64,10 @@ QtObject {
             Qt.vector3d(frame.position.x-15, frame.position.y + 128, frame.position.z-86.5), overviewCamera.position, overviewCamera.forward, overviewCamera.up, window.width, window.height, overviewCamera.fieldOfView, 1.0, 20000
         );
         if (i >= 10) {
-            botIDTexts.children[i].x = frame2D.x - 15;
+            botIDTexts.children[i].x = frame2D.x - 21;
             botIDRect.children[i].x = frame2D.x - 20;
-            botStatus.children[i].x = frame2D.x - 20;
-            botBar.children[i].x = frame2D.x - 20;
+            botStatus.children[i].x = frame2D.x - 14;
+            botBar.children[i].x = frame2D.x - 14;
         } else {
             botIDTexts.children[i].x = frame2D.x - 12;
             botIDRect.children[i].x = frame2D.x - 13;

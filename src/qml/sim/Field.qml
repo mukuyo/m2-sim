@@ -7,6 +7,8 @@ import "../../../assets/models/circle/line/"
 
 Node {
     id: rootEntity
+    property int leftGoalCount: 0
+    property int rightGoalCount: 0
 
     Stadium {
         id: stadium
@@ -148,9 +150,10 @@ Node {
         
         onBodyContact: (body, positions, impulses, normals) => {
             if (body.objectName == "ball") {
-                
-                ballCollisionMarker.position = Qt.vector3d(6170, positions[0].y, positions[0].z);
-                ballCollisionMarker.eulerRotation = Qt.vector3d(-90, -90, 0) 
+                goalHitMarker.visible = true;
+                goalHitMarker.position = Qt.vector3d(6165, positions[0].y, positions[0].z);
+                goalHitMarker.eulerRotation = Qt.vector3d(0, -90, 0);
+                rightGoalTimer.start();
             }
         }
     }
@@ -164,6 +167,7 @@ Node {
         physicsMaterial: physicsMaterial
         collisionShapes: BoxShape {}
         Model {
+            id: rightGoalTopModel
             source: "#Cube"
             materials: [
                 DefaultMaterial {
@@ -173,8 +177,10 @@ Node {
         }
         onBodyContact: (body, positions, impulses, normals) => {
             if (body.objectName == "ball") {
-                ballCollisionMarker.position = Qt.vector3d(positions[0].x, positions[0].y, -900);
-                ballCollisionMarker.eulerRotation = Qt.vector3d(-90, 0, 0) 
+                goalHitMarker.visible = true;
+                goalHitMarker.position = Qt.vector3d(positions[0].x, positions[0].y, -895);
+                goalHitMarker.eulerRotation = Qt.vector3d(0, 0, 0);
+                rightGoalTimer.start();
             }
         }
     }
@@ -188,6 +194,7 @@ Node {
         physicsMaterial: physicsMaterial
         collisionShapes: BoxShape {}
         Model {
+            id: rightGoalBottomModel
             source: "#Cube"
             materials: [
                 DefaultMaterial {
@@ -197,8 +204,10 @@ Node {
         }
         onBodyContact: (body, positions, impulses, normals) => {
             if (body.objectName == "ball") {
-                ballCollisionMarker.position = Qt.vector3d(positions[0].x, positions[0].y, 900);
-                ballCollisionMarker.eulerRotation = Qt.vector3d(-90, 0, 0) 
+                goalHitMarker.visible = true;
+                goalHitMarker.position = Qt.vector3d(positions[0].x, positions[0].y, 895);
+                goalHitMarker.eulerRotation = Qt.vector3d(0, 180, 0);
+                rightGoalTimer.start();
             }
         }
     }
@@ -226,8 +235,10 @@ Node {
         collisionShapes: BoxShape {}
         onBodyContact: (body, positions, impulses, normals) => {
             if (body.objectName == "ball") {
-                ballCollisionMarker.position = Qt.vector3d(-6170, positions[0].y, positions[0].z);
-                ballCollisionMarker.eulerRotation = Qt.vector3d(-90, 90, 0) 
+                goalHitMarker.visible = true;
+                goalHitMarker.position = Qt.vector3d(-6165, positions[0].y, positions[0].z);
+                goalHitMarker.eulerRotation = Qt.vector3d(0, 90, 0);
+                leftGoalTimer.start();
             }
         }
     }
@@ -241,6 +252,7 @@ Node {
         physicsMaterial: physicsMaterial
         collisionShapes: BoxShape {}
         Model {
+            id: leftGoalTopModel
             source: "#Cube"
             materials: [
                 DefaultMaterial {
@@ -250,8 +262,10 @@ Node {
         }
         onBodyContact: (body, positions, impulses, normals) => {
             if (body.objectName == "ball") {
-                ballCollisionMarker.position = Qt.vector3d(positions[0].x, positions[0].y, -900);
-                ballCollisionMarker.eulerRotation = Qt.vector3d(-90, 0, 0) 
+                goalHitMarker.visible = true;
+                goalHitMarker.position = Qt.vector3d(positions[0].x, positions[0].y, -895);
+                goalHitMarker.eulerRotation = Qt.vector3d(0, 0, 0);
+                leftGoalTimer.start();
             }
         }
     }
@@ -265,6 +279,7 @@ Node {
         physicsMaterial: physicsMaterial
         collisionShapes: BoxShape {}
         Model {
+            id: leftGoalBottomModel
             source: "#Cube"
             materials: [
                 DefaultMaterial {
@@ -274,8 +289,10 @@ Node {
         }
         onBodyContact: (body, positions, impulses, normals) => {
             if (body.objectName == "ball") {
-                ballCollisionMarker.position = Qt.vector3d(positions[0].x, positions[0].y, 900);
-                ballCollisionMarker.eulerRotation = Qt.vector3d(-90, 0, 0) 
+                goalHitMarker.visible = true;
+                goalHitMarker.position = Qt.vector3d(positions[0].x, positions[0].y, 895);
+                goalHitMarker.eulerRotation = Qt.vector3d(0, 180, 0);
+                leftGoalTimer.start();
             }
         }
     }
@@ -451,5 +468,62 @@ Node {
                 diffuseColor: "#ED752F"
             }
         ]
+    }
+    Timer {
+        id: leftGoalTimer
+        interval: 10
+        repeat: true
+        running: false
+        onTriggered: {
+            let color = 1.0;
+            leftGoal.materials[0].diffuseColor = Qt.rgba(color, 0, 0, 1);
+            leftGoalTopModel.materials[0].diffuseColor = Qt.rgba(color, 0, 0, 1);
+            leftGoalBottomModel.materials[0].diffuseColor = Qt.rgba(color, 0, 0, 1);
+            leftGoalCount++;
+            if (leftGoalCount >= 40) {
+                leftGoal.materials[0].diffuseColor = "black";
+                leftGoalTopModel.materials[0].diffuseColor = "black";
+                leftGoalBottomModel.materials[0].diffuseColor = "black";
+                leftGoalTimer.stop();
+                leftGoalCount = 0;
+            }
+        }
+    }
+    Timer {
+        id: rightGoalTimer
+        interval: 10
+        repeat: true
+        running: false
+        onTriggered: {
+            let color = 1.0;
+            rightGoal.materials[0].diffuseColor = Qt.rgba(color, 0, 0, 1);
+            rightGoalTopModel.materials[0].diffuseColor = Qt.rgba(color, 0, 0, 1);
+            rightGoalBottomModel.materials[0].diffuseColor = Qt.rgba(color, 0, 0, 1);
+            rightGoalCount++;
+            if (rightGoalCount >= 40) {
+                rightGoal.materials[0].diffuseColor = "black";
+                rightGoalTopModel.materials[0].diffuseColor = "black";
+                rightGoalBottomModel.materials[0].diffuseColor = "black";
+                rightGoalTimer.stop();
+                rightGoalCount = 0;
+            }
+        }
+    }
+    Model {
+        id: goalHitMarker
+        visible: false
+        position: Qt.vector3d(0, 0, 0)
+        eulerRotation: Qt.vector3d(-90, 90, 0)
+        scale: Qt.vector3d(0.8, 0.8, 0.8)   // サイズ調整
+
+        source: "#Rectangle"  // 平面
+
+        materials: DefaultMaterial {
+            diffuseMap: Texture {
+                source: "../../../docs/images/ball_collision.png"   // ← 貼りたい画像
+            }
+            lighting: DefaultMaterial.NoLighting
+            opacity: 0.9
+        }
     }
 }
