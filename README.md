@@ -9,7 +9,7 @@ Welcome to m2-sim, a simulation tool designed for the [RoboCup Soccer Small Size
 - Import custom 3D models
 - Get pixel coordinates from the camera mounted on the robot
 - Visualize values received via Protobuf by selecting each robot’s data
-  
+![collisio_demo](./docs/gif/collision.gif)
 Please read [Documents](docs/)
   
 ## System Requirements
