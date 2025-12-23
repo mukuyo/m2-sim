@@ -27,20 +27,18 @@ QtObject {
         return { positions: botPositions, ballContacts: color.holds, pixels: botPixelBalls, cameraExists: color.cameraExists };
     }
     function updateBall() {
-        if (ball.position.x < 50000) {
+        if (dribbleInfo.id == -1) {
             ballModels.children[0].position = Qt.vector3d(ball.position.x, ball.position.y, ball.position.z);
             ballPosition = Qt.vector4d(ball.position.x, ball.position.y, ball.position.z, 0);
             ballModels.children[0].children[0].materials[0].diffuseColor= "orange";
         } else {
-            
             ballModels.children[0].children[0].materials[0].diffuseColor= "#EB392A";
-
             ballModels.children[0].position = Qt.vector3d(ballPosition.x, ballPosition.y, ballPosition.z);
         }
         ballMarker.position = Qt.vector3d(ballPosition.x, 5, ballPosition.z);
     }
 
-    function kick(color, frame, i, radian) {
+    function kick(color, frame, i, radian, ballVelocity) {
         color.holds[i] = false;
         
         frame.collisionShapes[5].position = Qt.vector3d(0, 5000, 0);
@@ -49,14 +47,19 @@ QtObject {
         }
         dribbleInfo.id = -1;
 
-        let rg =0.043;
         kickFlag = true;
         kickTimer.running = true;
-        ball.applyCentralImpulse(Qt.vector3d(
-            color.kickspeeds[i].x * Math.cos(radian)*rg,
-            color.kickspeeds[i].y*rg,
-            -color.kickspeeds[i].x * Math.sin(radian)*rg
+
+        ball.setLinearVelocity(Qt.vector3d(
+            color.kickspeeds[i].x * Math.cos(radian),
+            color.kickspeeds[i].y,
+            -color.kickspeeds[i].x * Math.sin(radian)
         ));
+        // ball.applyCentralImpulse(Qt.vector3d(
+        //     color.kickspeeds[i].x * Math.cos(radian),
+        //     color.kickspeeds[i].y,
+        //     -color.kickspeeds[i].x * Math.sin(radian)
+        // ));
     }
 
     function updateID(color, frame, i, botIDTexts, botStatus, botIDRect, botBar) {

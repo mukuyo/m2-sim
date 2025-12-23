@@ -3,7 +3,7 @@ import QtQuick3D
 
 Node {
     id: lightRoot
-    property real lightIntensity: 0.5
+    property real lightIntensity: 0.2
 
     DirectionalLight {
         eulerRotation.x: -90

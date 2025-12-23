@@ -17,7 +17,7 @@ import "viz/"
 
 Window {
     id: window
-    title: "M2-Sim"
+    title: "m2-sim"
     width: windowWidth
     height: windowHeight
     visible: true
@@ -42,13 +42,13 @@ Window {
         PhysicsWorld {
             id: physicsWorld
             scene: viewport.scene
-            // maximumTimestep: 1000.0 / observer.desiredFps
-            // minimumTimestep: 1000.0 / observer.desiredFps
+            maximumTimestep: 1000.0 / observer.desiredFps
+            minimumTimestep: 1000.0 / observer.desiredFps
             enableCCD: observer.ccdMode
             gravity: Qt.vector3d(0, -observer.gravity*1000.0, 0)
             typicalLength: 100
             typicalSpeed: 1000
-            defaultDensity: 1.0
+            // defaultDensity: 
             numThreads: observer.numThreads
             forceDebugDraw: observer.forceDebugDrawMode
             onFrameDone: (timestep) => {
@@ -71,27 +71,6 @@ Window {
             lightRobotMode: observer.lightBlueRobotMode
             colorHeight: 0.15
             poses: [
-                Qt.vector4d(6000, 0, 0, 90),
-                Qt.vector4d(500, 0, 0, 90),
-                Qt.vector4d(950, 0, 2000, 90),
-                Qt.vector4d(950, 0, -2000, 90),
-                Qt.vector4d(2000, 0, 1500, 90),
-                Qt.vector4d(2000, 0, -1500, 90),
-                Qt.vector4d(4000, 0, 0, 90),
-                Qt.vector4d(4000, 0, 1000, 90),
-                Qt.vector4d(4000, 0, -1000, 90),
-                Qt.vector4d(3000, 0, 3500, 90),
-                Qt.vector4d(3000, 0, -3500, 90),
-                Qt.vector4d(4000, 0, 2000, 90),
-                Qt.vector4d(4000, 0, -2000, 90),
-            ]
-        }
-        RobotInfo {
-            id: yellow
-            num: observer.yellowRobotCount
-            lightRobotMode: observer.lightYellowRobotMode
-            colorHeight: 0.15
-            poses: [
                 Qt.vector4d(-6000, 0, 0, -90),
                 Qt.vector4d(-500, 0, 0, -90),
                 Qt.vector4d(-950, 0, 2000, -90),
@@ -105,6 +84,27 @@ Window {
                 Qt.vector4d(-3000, 0, -3500, -90),
                 Qt.vector4d(-4000, 0, 2000, -90),
                 Qt.vector4d(-4000, 0, -2000, -90),
+            ]
+        }
+        RobotInfo {
+            id: yellow
+            num: observer.yellowRobotCount
+            lightRobotMode: observer.lightYellowRobotMode
+            colorHeight: 0.15
+            poses: [
+                Qt.vector4d(6000, 0, 0, 90),
+                Qt.vector4d(500, 0, 0, 90),
+                Qt.vector4d(950, 0, 2000, 90),
+                Qt.vector4d(950, 0, -2000, 90),
+                Qt.vector4d(2000, 0, 1500, 90),
+                Qt.vector4d(2000, 0, -1500, 90),
+                Qt.vector4d(4000, 0, 0, 90),
+                Qt.vector4d(4000, 0, 1000, 90),
+                Qt.vector4d(4000, 0, -1000, 90),
+                Qt.vector4d(3000, 0, 3500, 90),
+                Qt.vector4d(3000, 0, -3500, 90),
+                Qt.vector4d(4000, 0, 2000, 90),
+                Qt.vector4d(4000, 0, -2000, 90),
             ]
         }
         Keys.onPressed: (event) => {
@@ -424,8 +424,10 @@ Window {
             window.height = observer.windowHeight   
         }
         function onUpdateSimulationSignal() {
-            game_objects.syncGameObjects();
             runTime = (Date.now() - lastTime);
+
+            game_objects.syncGameObjects(runTime);
+            
             lastTime = Date.now();
             showRunTime = runTime;
         }

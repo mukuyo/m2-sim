@@ -9,6 +9,7 @@ Node {
     id: rootEntity
     property int leftGoalCount: 0
     property int rightGoalCount: 0
+    property real dc: 0.55
 
     Stadium {
         id: stadium
@@ -30,18 +31,22 @@ Node {
             source: "#Rectangle"
             objectName: "field"
             pickable: true
-            scale: Qt.vector3d(154, 124, 0.1)
+            scale: Qt.vector3d(164, 164, 0.1)
             opacity: observer.lightFieldMode
             materials: [ 
                 DefaultMaterial {
-                    diffuseMap: Texture {
-                        source: "../../../assets/textures/field_texture.jpg"
-                    }
+                    diffuseMap: groundTexture
+                    diffuseColor: Qt.rgba(dc, dc, dc, 1.0)                    
                 }
             ]
         }
     }
-
+    Texture {
+        id: groundTexture
+        source: "../../../assets/textures/field_texture.png"
+        scaleV: 4
+        scaleU: 4
+    }
     Model {
         id: topWall
         pickable: true
@@ -176,7 +181,7 @@ Node {
             ]
         }
         onBodyContact: (body, positions, impulses, normals) => {
-            if (body.objectName == "ball") {
+            if (body.objectName == "ball" && normals[0].z < 0) {
                 goalHitMarker.visible = true;
                 goalHitMarker.position = Qt.vector3d(positions[0].x, positions[0].y, -895);
                 goalHitMarker.eulerRotation = Qt.vector3d(0, 0, 0);
@@ -203,7 +208,7 @@ Node {
             ]
         }
         onBodyContact: (body, positions, impulses, normals) => {
-            if (body.objectName == "ball") {
+            if (body.objectName == "ball" && normals[0].z > 0) {
                 goalHitMarker.visible = true;
                 goalHitMarker.position = Qt.vector3d(positions[0].x, positions[0].y, 895);
                 goalHitMarker.eulerRotation = Qt.vector3d(0, 180, 0);
@@ -261,7 +266,7 @@ Node {
             ]
         }
         onBodyContact: (body, positions, impulses, normals) => {
-            if (body.objectName == "ball") {
+            if (body.objectName == "ball" && normals[0].z < 0) {
                 goalHitMarker.visible = true;
                 goalHitMarker.position = Qt.vector3d(positions[0].x, positions[0].y, -895);
                 goalHitMarker.eulerRotation = Qt.vector3d(0, 0, 0);
@@ -288,7 +293,7 @@ Node {
             ]
         }
         onBodyContact: (body, positions, impulses, normals) => {
-            if (body.objectName == "ball") {
+            if (body.objectName == "ball" && normals[0].z > 0) {
                 goalHitMarker.visible = true;
                 goalHitMarker.position = Qt.vector3d(positions[0].x, positions[0].y, 895);
                 goalHitMarker.eulerRotation = Qt.vector3d(0, 180, 0);
@@ -514,13 +519,13 @@ Node {
         visible: false
         position: Qt.vector3d(0, 0, 0)
         eulerRotation: Qt.vector3d(-90, 90, 0)
-        scale: Qt.vector3d(0.8, 0.8, 0.8)   // サイズ調整
+        scale: Qt.vector3d(1.0, 1.0, 1.0)   // サイズ調整
 
         source: "#Rectangle"  // 平面
 
         materials: DefaultMaterial {
             diffuseMap: Texture {
-                source: "../../../docs/images/ball_collision.png"   // ← 貼りたい画像
+                source: "../../../assets/textures/ball_collision.png"
             }
             lighting: DefaultMaterial.NoLighting
             opacity: 0.9
