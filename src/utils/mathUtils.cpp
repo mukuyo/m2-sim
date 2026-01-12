@@ -22,6 +22,10 @@ float MathUtils::degreeToRadian(float degree) {
     return degree * (M_PI / 180.0f);
 }
 
+float MathUtils::vector3dLength(QVector4D vec) {
+    return std::sqrt(vec.x() * vec.x() + vec.y() * vec.y() + vec.z() * vec.z());
+}
+
 QVector4D MathUtils::calcVelocity(QVector4D pose, QVector4D prePose, float deltaTime) {
     QVector4D worldVelocity = QVector4D(
         (pose.x() - prePose.x()) / deltaTime,

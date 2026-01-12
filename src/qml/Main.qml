@@ -117,6 +117,8 @@ Window {
                 game_objects.teleopVelocity.x += -game_objects.acceleration;
             } else if (event.key === Qt.Key_D) {
                 game_objects.teleopVelocity.x += game_objects.acceleration;
+            } else if (event.key === Qt.Key_Y) {
+                game_objects.test();
             }
             key = event.key;
         }
@@ -406,7 +408,7 @@ Window {
                         id: game_objects
                         property var window: window
                         property var overviewCamera: overviewCamera
-                        property vector3d teleopVelocity: Qt.vector3d(0, 0, 0)
+                        property vector4d teleopVelocity: Qt.vector4d(0, 0, 0, 0)
                         property real acceleration: 100.0
                         property var field_cursor : Qt.vector3d(0, 0, 0)
                         property var view3D: viewport

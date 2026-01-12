@@ -16,6 +16,7 @@ public:
     Q_INVOKABLE float normalizeRadian(float radian);
     Q_INVOKABLE float radianToDegree(float radian);
     Q_INVOKABLE float degreeToRadian(float degree);
+    Q_INVOKABLE float vector3dLength(QVector4D vec);
     Q_INVOKABLE QVector4D calcVelocity(QVector4D pose, QVector4D prePose, float deltaTime);
 
 private:
