@@ -388,8 +388,7 @@ Node {
         let nx = -v.x / speed
         let ny = -v.y / speed
         let nz = -v.z / speed
-        let muu = 40000
-
+        let muu = observer.rollingFriction * 100000.0
         let f = muu
         ball.applyCentralForce(Qt.vector3d(nx * f, ny * f, nz * f))
     }

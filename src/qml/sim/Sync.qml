@@ -49,17 +49,13 @@ QtObject {
 
         kickFlag = true;
         kickTimer.running = true;
-
+        color.kickspeeds[i].x *= observer.kickerFriction;
+        color.kickspeeds[i].y *= observer.kickerFriction;
         ball.setLinearVelocity(Qt.vector3d(
             color.kickspeeds[i].x * Math.cos(radian),
             color.kickspeeds[i].y,
             -color.kickspeeds[i].x * Math.sin(radian)
         ));
-        // ball.applyCentralImpulse(Qt.vector3d(
-        //     color.kickspeeds[i].x * Math.cos(radian),
-        //     color.kickspeeds[i].y,
-        //     -color.kickspeeds[i].x * Math.sin(radian)
-        // ));
     }
 
     function updateID(color, frame, i, botIDTexts, botStatus, botIDRect, botBar) {

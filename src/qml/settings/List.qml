@@ -32,6 +32,8 @@ Item {
         ListElement { name: "Ball Static Friction"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 0.11; MaxValue: 10 }
         ListElement { name: "Ball Dynamic Friction"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 0.11; MaxValue: 10 }
         ListElement { name: "Ball Restitution"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 1.0; MaxValue: 10 }
+        ListElement { name: "Rolling Friction"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 0.02; MaxValue: 10 }
+        ListElement { name: "Kicker Friction"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 0.8; MaxValue: 10 }
     }
     ListModel {
         id: geometryItems
@@ -380,6 +382,12 @@ Item {
                                     } else if (model.name === "Ball Restitution") {
                                         tempBallRestitution = value.toFixed(2);
                                         model.value = tempBallRestitution;
+                                    } else if (model.name === "Rolling Friction") {
+                                        tempRollingFriction = value.toFixed(2);
+                                        model.value = tempRollingFriction;
+                                    } else if (model.name === "Kicker Friction") {
+                                        tempKickerFriction = value.toFixed(2);
+                                        model.value = tempKickerFriction;
                                     } else if (model.name === "Line Thickness") {
                                         tempLineThickness = value;
                                         model.value = tempLineThickness;
@@ -438,6 +446,13 @@ Item {
                                 } else if (model.name === "Ball Restitution") {
                                     value = observer.ballRestitution;
                                     tempBallRestitution = value.toFixed(2);
+                                } else if (model.name === "Rolling Friction") {
+                                    value = observer.rollingFriction;
+                                    tempRollingFriction = value.toFixed(2);
+                                } else if (model.name === "Kicker Friction") {
+                                    value = observer.kickerFriction;
+                                    tempKickerFriction = value.toFixed(2);
+                                
                                 // } else if (model.name === "Line Thickness") {
                                 //     value = observer.lineThickness;
                                 // } else if (model.name === "Field Width") {
@@ -488,6 +503,11 @@ Item {
                                     text = observer.ballDynamicFriction.toString();
                                 } else if (model.name === "Ball Restitution") {
                                     text = observer.ballRestitution.toString();
+                                } else if (model.name === "Rolling Friction") {
+                                    text = observer.rollingFriction.toString();
+                                } else if (model.name === "Kicker Friction") {
+                                    text = observer.kickerFriction.toString();
+                                
                                 // } else if (model.name === "Line Thickness") {
                                 //     text = observer.lineThickness.toString();
                                 // } else if (model.name === "Field Width") {
@@ -529,6 +549,10 @@ Item {
                                         tempBallDynamicFriction = newValue.toFixed(2);
                                     } else if (model.name === "Ball Restitution") {
                                         tempBallRestitution = newValue.toFixed(2);
+                                    } else if (model.name === "Rolling Friction") {
+                                        tempRollingFriction = newValue.toFixed(2);
+                                    } else if (model.name === "Kicker Friction") {
+                                        tempKickerFriction = newValue.toFixed(2);
                                     }
                                 } else {
                                     text = slider.value.toString()

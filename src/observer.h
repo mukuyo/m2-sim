@@ -38,6 +38,8 @@ class Observer : public QObject {
     Q_PROPERTY(float ballStaticFriction READ getBallStaticFriction WRITE setBallStaticFriction NOTIFY settingChanged)
     Q_PROPERTY(float ballDynamicFriction READ getBallDynamicFriction WRITE setBallDynamicFriction NOTIFY settingChanged)
     Q_PROPERTY(float ballRestitution READ getBallRestitution WRITE setBallRestitution NOTIFY settingChanged)
+    Q_PROPERTY(float rollingFriction READ getRollingFriction WRITE setRollingFriction NOTIFY settingChanged)
+    Q_PROPERTY(float kickerFriction READ getKickerFriction WRITE setKickerFriction NOTIFY settingChanged)
     Q_PROPERTY(float gravity READ getGravity WRITE setGravity NOTIFY settingChanged)
     Q_PROPERTY(float desiredFps READ getDesiredFps WRITE setDesiredFps NOTIFY settingChanged)
     Q_PROPERTY(bool ccdMode READ getCcdMode WRITE setCcdMode NOTIFY settingChanged)
@@ -109,6 +111,8 @@ public:
     float getBallStaticFriction() const { return ballStaticFriction; }
     float getBallDynamicFriction() const { return ballDynamicFriction; }
     float getBallRestitution() const { return ballRestitution; }
+    float getRollingFriction() const { return rollingFriction; }
+    float getKickerFriction() const { return kickerFriction; }
     float getGravity() const { return gravity; }
     float getDesiredFps() const { return desiredFps; }
     bool getCcdMode() const { return ccdMode; }
@@ -131,6 +135,8 @@ public:
     void setBallStaticFriction(float friction);
     void setBallDynamicFriction(float friction);
     void setBallRestitution(float restitution);
+    void setRollingFriction(float friction);
+    void setKickerFriction(float friction);
     void setGravity(float gravity);
     void setDesiredFps(float fps);
     void setCcdMode(bool mode);
@@ -187,6 +193,8 @@ private:
     float ballStaticFriction;
     float ballDynamicFriction;
     float ballRestitution;
+    float rollingFriction;
+    float kickerFriction;
     float gravity;
     float desiredFps;
     bool ccdMode;

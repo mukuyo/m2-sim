@@ -28,6 +28,8 @@ Item {
     property real tempBallStaticFriction: observer.ballStaticFriction
     property real tempBallDynamicFriction: observer.ballDynamicFriction
     property real tempBallRestitution: observer.ballRestitution
+    property real tempRollingFriction: observer.rollingFriction
+    property real tempKickerFriction: observer.kickerFriction
     property real tempFieldWidth: 0
     property real tempFieldHeight: 0
     property real tempLineThickness: 0
@@ -171,6 +173,7 @@ Item {
                     observer.ballStaticFriction = tempBallStaticFriction;
                     observer.ballDynamicFriction = tempBallDynamicFriction;
                     observer.ballRestitution = tempBallRestitution;
+                    observer.rollingFriction = tempRollingFriction;
                     observer.numThreads = tempNumThreads;
                     // observer.lineThickness = tempLineThickness;
                     // observer.goalWidth = tempGoalWidth;

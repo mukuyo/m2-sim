@@ -15,6 +15,8 @@ Observer::Observer(QObject *parent) : QObject(parent), visionReceiver(new Vision
     ballStaticFriction = config.value("Physics/BallStaticFriction", 0.5).toFloat();
     ballDynamicFriction = config.value("Physics/BallDynamicFriction", 0.3).toFloat();
     ballRestitution = config.value("Physics/BallRestitution", 0.5).toFloat();
+    rollingFriction = config.value("Physics/RollingFriction", 0.04).toFloat();
+    kickerFriction = config.value("Physics/KickerFriction", 0.8).toFloat();
     gravity = config.value("Physics/Gravity", 9.81).toFloat();
     desiredFps = config.value("Physics/DesiredFps", 60.0).toFloat();
     ccdMode = config.value("Physics/CCD", true).toBool();
@@ -181,6 +183,16 @@ void Observer::setBallDynamicFriction(float friction) {
 void Observer::setBallRestitution(float restitution) {
     ballRestitution = restitution;
     config.setValue("Physics/BallRestitution", restitution);
+    emit settingChanged();
+}
+void Observer::setRollingFriction(float friction) {
+    rollingFriction = friction;
+    config.setValue("Physics/RollingFriction", friction);
+    emit settingChanged();
+}
+void Observer::setKickerFriction(float friction) {
+    kickerFriction = friction;
+    config.setValue("Physics/KickerFriction", friction);
     emit settingChanged();
 }
 void Observer::setGravity(float gravity) {
