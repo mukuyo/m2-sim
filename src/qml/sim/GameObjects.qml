@@ -19,7 +19,7 @@ Node {
     Sync {
         id: sync
     }
-    property real colorHeight: 0.3
+    property real colorHeight: 0.2
 
     property real radianOffset: -Math.atan(350.0/547.72)
     property var selectedRobotColor: "blue"
@@ -382,15 +382,15 @@ Node {
     {
         let v = ballVelocity
         let speed = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
-        if (speed < 0.01 || speed > 10 || ballPosition.y > 30) {
+        if (speed < 0.1 || speed > 10 || ballPosition.y > 30) {
             return;
         }
         let nx = -v.x / speed
         let ny = -v.y / speed
         let nz = -v.z / speed
-        let muu = observer.rollingFriction * 100000.0
+        let muu = observer.rollingFriction * 1000.0
         let f = muu
-        ball.applyCentralForce(Qt.vector3d(nx * f, ny * f, nz * f))
+        ball.applyCentralImpulse(Qt.vector3d(nx * f, ny * f, nz * f))
     }
 
     function syncGameObjects() {
@@ -512,6 +512,14 @@ Node {
         vy += vn * dy + vt * dx; 
         ball.setLinearVelocity(Qt.vector3d(0, 0, 1000));
 
+    }
+    function placeClothLineBall() {
+        console.log("placeClothLineBall");
+        if (ball.position.z < 0) {
+            ball.reset(Qt.vector3d(ball.position.x, 21, -4000), Qt.vector3d(0, 0, 0));
+        } else {
+            ball.reset(Qt.vector3d(ball.position.x, 21, 4000), Qt.vector3d(0, 0, 0));
+        }
     }
 }
 

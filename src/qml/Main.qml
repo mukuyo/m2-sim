@@ -42,8 +42,8 @@ Window {
         PhysicsWorld {
             id: physicsWorld
             scene: viewport.scene
-            maximumTimestep: 1000.0 / observer.desiredFps
-            minimumTimestep: 1000.0 / observer.desiredFps
+            // maximumTimestep: 1000.0 / observer.desiredFps
+            // minimumTimestep: 1000.0 / observer.desiredFps
             enableCCD: observer.ccdMode
             gravity: Qt.vector3d(0, -observer.gravity*1000.0, 0)
             typicalLength: 100
@@ -119,8 +119,9 @@ Window {
                 game_objects.teleopVelocity.x += game_objects.acceleration;
             } else if (event.key === Qt.Key_Y) {
                 game_objects.test();
+            } else if (event.key === Qt.Key_P) {
+                game_objects.placeClothLineBall();
             }
-            key = event.key;
         }
         Keys.onReleased: (event) => {
             if (event.key === Qt.Key_R) {
@@ -139,7 +140,6 @@ Window {
             Observe {
                 id: observer
             }
-
             View3D {
                 id: viewport
                 anchors.fill: parent
