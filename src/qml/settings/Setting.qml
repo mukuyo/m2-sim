@@ -174,6 +174,7 @@ Item {
                     observer.ballDynamicFriction = tempBallDynamicFriction;
                     observer.ballRestitution = tempBallRestitution;
                     observer.rollingFriction = tempRollingFriction;
+                    observer.kickerFriction = tempKickerFriction;
                     observer.numThreads = tempNumThreads;
                     // observer.lineThickness = tempLineThickness;
                     // observer.goalWidth = tempGoalWidth;

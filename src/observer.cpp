@@ -46,11 +46,6 @@ Observer::Observer(QObject *parent) : QObject(parent), visionReceiver(new Vision
     numThreads = config.value("Display/NumThreads", -1).toInt();
     frameInterval = 1000.0 / desiredFps;
 
-    QTimer *timer = new QTimer(this);
-    timer->setTimerType(Qt::PreciseTimer); // 高精度タイマー
-    connect(timer, &QTimer::timeout, this, &Observer::updateSender);
-    timer->start(17); // 17ms 間隔
-
     QTimer *simTimer = new QTimer(this);
     simTimer->setTimerType(Qt::PreciseTimer); // 高精度タイマー
     connect(simTimer, &QTimer::timeout, this, &Observer::updateSimulator);
@@ -240,7 +235,7 @@ void Observer::updateObjects(
 }
 
 void Observer::updateSender() {
-    sender->send(1, ballPosition, bluePositions, yellowPositions);
+    
 }
 
 void Observer::updateSimulator() {
@@ -251,4 +246,5 @@ void Observer::updateSimulator() {
         fps = 1000.0 / deltaMs;   // FPS算出
     }
     emit updateSimulationSignal();
+    sender->send(1, ballPosition, bluePositions, yellowPositions);
 }

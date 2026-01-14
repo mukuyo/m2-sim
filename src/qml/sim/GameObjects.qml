@@ -374,15 +374,13 @@ Node {
             let ballFriction = 0.99;
             teleopVelocity = Qt.vector3d(teleopVelocity.x * ballFriction, teleopVelocity.y * ballFriction, teleopVelocity.z * ballFriction);
         }
-        
-
     }
 
     function applyRollingFriction()
     {
         let v = ballVelocity
         let speed = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
-        if (speed < 0.1 || speed > 10 || ballPosition.y > 30) {
+        if (speed < 0.001 || speed > 10 || ballPosition.y > 30) {
             return;
         }
         let nx = -v.x / speed
@@ -484,6 +482,7 @@ Node {
         }
         ballMarker.children[0].materials[0].diffuseColor= "#EB392A";
         ballMarker.children[0].materials[0].opacity = 0.4;
+        ball.setLinearVelocity(Qt.vector3d(1000, 0, 0));
     }
     QtObject {
         id: dribbleInfo
@@ -510,11 +509,9 @@ Node {
         let vt = -(vballx*dy - vbally*dx);
         vx += vn * dx - vt * dy;
         vy += vn * dy + vt * dx; 
-        ball.setLinearVelocity(Qt.vector3d(0, 0, 1000));
 
     }
     function placeClothLineBall() {
-        console.log("placeClothLineBall");
         if (ball.position.z < 0) {
             ball.reset(Qt.vector3d(ball.position.x, 21, -4000), Qt.vector3d(0, 0, 0));
         } else {
