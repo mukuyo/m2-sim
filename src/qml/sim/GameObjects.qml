@@ -482,7 +482,6 @@ Node {
         }
         ballMarker.children[0].materials[0].diffuseColor= "#EB392A";
         ballMarker.children[0].materials[0].opacity = 0.4;
-        ball.setLinearVelocity(Qt.vector3d(1000, 0, 0));
     }
     QtObject {
         id: dribbleInfo

@@ -20,7 +20,7 @@ Item {
         ListElement { name: "Width"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 1100; MaxValue: 2560 }
         ListElement { name: "Height"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 720; MaxValue: 1240 }
         ListElement { name: "Force Debug Draw"; detail: "Enable drawing of all active shapes"; slider: false; toggle: true; combo: false; InitValue: 0 }
-        ListElement { name: "Thread Numner"; detail: "Number of threads (-1 for auto)"; slider: false; toggle: false; combo: false; InitValue: -1  }
+        ListElement { name: "Thread Number"; detail: "Number of threads (-1 for auto)"; slider: false; toggle: false; combo: false; InitValue: -1  }
     }
     ListModel {
         id: physicsItems

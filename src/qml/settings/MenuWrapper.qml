@@ -71,7 +71,7 @@ Item {
                             text = observer.blueTeamControlPort.toString();
                         } else if (model.name === "Yellow Control Port") {
                             text = observer.yellowTeamControlPort.toString();
-                        } else if (model.name === "Thread Numner") {
+                        } else if (model.name === "Thread Number") {
                             text = observer.numThreads.toString();
                         } else {
                             text = model.InitValue.toString();
@@ -90,7 +90,7 @@ Item {
                                 tempBlueControlPort = newValue;
                             } else if (model.name === "Yellow Control Port") {
                                 tempYellowControlPort = newValue;
-                            } else if (model.name === "Thread Numner") {
+                            } else if (model.name === "Thread Number") {
                                 tempNumThreads = newValue;
                             }
                         } else {

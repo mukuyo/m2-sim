@@ -57,6 +57,8 @@ Item {
                 switchState = tempLightYellowRobotMode
             } else if (model.name === "Stadium") {
                 switchState = tempLightStadiumMode
+            } else if (model.name === "Field") {
+                switchState = tempLightFieldMode
             } else if (model.name === "Continuous Collision Detection") {
                 switchState = tempCCDMode
             }

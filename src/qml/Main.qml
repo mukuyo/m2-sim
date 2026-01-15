@@ -48,13 +48,10 @@ Window {
             gravity: Qt.vector3d(0, -observer.gravity*1000.0, 0)
             typicalLength: 100
             typicalSpeed: 1000
-            // defaultDensity: 
             numThreads: observer.numThreads
             forceDebugDraw: observer.forceDebugDrawMode
             onFrameDone: (timestep) => {
                 game_objects.updateGameObjects(runTime);
-                // game_objects.syncGameObjects();
-                // showRunTime = runTime;
             }
         }
         Timer {

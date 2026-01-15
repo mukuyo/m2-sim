@@ -32,7 +32,7 @@ Node {
             objectName: "field"
             pickable: true
             scale: Qt.vector3d(164, 164, 0.1)
-            opacity: observer.lightFieldMode
+            opacity: !observer.lightFieldMode
             materials: [ 
                 DefaultMaterial {
                     diffuseMap: groundTexture
