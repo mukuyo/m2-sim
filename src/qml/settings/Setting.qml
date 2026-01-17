@@ -25,8 +25,6 @@ Item {
     property real tempDesiredFps: observer.desiredFps
     property bool tempCCDMode: observer.ccdMode
     property real tempGravity: observer.gravity
-    property real tempBallStaticFriction: observer.ballStaticFriction
-    property real tempBallDynamicFriction: observer.ballDynamicFriction
     property real tempBallRestitution: observer.ballRestitution
     property real tempRollingFriction: observer.rollingFriction
     property real tempKickerFriction: observer.kickerFriction
@@ -170,8 +168,6 @@ Item {
                     observer.desiredFps = tempDesiredFps;
                     observer.ccdMode = tempCCDMode;
                     observer.gravity = tempGravity;
-                    observer.ballStaticFriction = tempBallStaticFriction;
-                    observer.ballDynamicFriction = tempBallDynamicFriction;
                     observer.ballRestitution = tempBallRestitution;
                     observer.rollingFriction = tempRollingFriction;
                     observer.kickerFriction = tempKickerFriction;

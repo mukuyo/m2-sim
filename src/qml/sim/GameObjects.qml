@@ -275,8 +275,6 @@ Node {
 
     PhysicsMaterial {
         id: ballMaterial
-        staticFriction: observer.ballStaticFriction
-        dynamicFriction: observer.ballDynamicFriction
         restitution: observer.ballRestitution
     }
 
@@ -520,7 +518,7 @@ Node {
             ball.reset(Qt.vector3d(5500 * Math.sign(ball.position.x), 21, ball.position.z), Qt.vector3d(0, 0, 0));
             return;
         }
-        
+
         if (ball.position.z < 0) {
             ball.reset(Qt.vector3d(ball.position.x, 21, -4000), Qt.vector3d(0, 0, 0));
         } else {

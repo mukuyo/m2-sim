@@ -35,8 +35,6 @@ class Observer : public QObject {
     Q_PROPERTY(bool lightFieldMode READ getLightFieldMode WRITE setLightFieldMode NOTIFY settingChanged)
     Q_PROPERTY(int blueRobotCount READ getBlueRobotCount WRITE setBlueRobotCount NOTIFY settingChanged)
     Q_PROPERTY(int yellowRobotCount READ getYellowRobotCount WRITE setYellowRobotCount NOTIFY settingChanged)
-    Q_PROPERTY(float ballStaticFriction READ getBallStaticFriction WRITE setBallStaticFriction NOTIFY settingChanged)
-    Q_PROPERTY(float ballDynamicFriction READ getBallDynamicFriction WRITE setBallDynamicFriction NOTIFY settingChanged)
     Q_PROPERTY(float ballRestitution READ getBallRestitution WRITE setBallRestitution NOTIFY settingChanged)
     Q_PROPERTY(float rollingFriction READ getRollingFriction WRITE setRollingFriction NOTIFY settingChanged)
     Q_PROPERTY(float kickerFriction READ getKickerFriction WRITE setKickerFriction NOTIFY settingChanged)
@@ -108,8 +106,6 @@ public:
     bool getLightFieldMode() const { return lightFieldMode; }
     int getBlueRobotCount() const { return blueRobotCount; }
     int getYellowRobotCount() const { return yellowRobotCount; }
-    float getBallStaticFriction() const { return ballStaticFriction; }
-    float getBallDynamicFriction() const { return ballDynamicFriction; }
     float getBallRestitution() const { return ballRestitution; }
     float getRollingFriction() const { return rollingFriction; }
     float getKickerFriction() const { return kickerFriction; }
@@ -132,13 +128,11 @@ public:
     void setLightFieldMode(bool mode);
     void setBlueRobotCount(int count);
     void setYellowRobotCount(int count);
-    void setBallStaticFriction(float friction);
-    void setBallDynamicFriction(float friction);
     void setBallRestitution(float restitution);
     void setRollingFriction(float friction);
     void setKickerFriction(float friction);
     void setGravity(float gravity);
-    void setDesiredFps(float fps);
+    void setDesiredFps(int fps);
     void setCcdMode(bool mode);
     void setNumThreads(int threads);
     void updateSimulator();
@@ -196,7 +190,7 @@ private:
     float rollingFriction;
     float kickerFriction;
     float gravity;
-    float desiredFps;
+    int desiredFps;
     bool ccdMode;
 
     QList<QVector3D> bluePositions;
