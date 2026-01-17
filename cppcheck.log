@@ -1,0 +1,18 @@
+src/models/camera.cpp:0:0: information: Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches. [normalCheckLevelMaxBranches]
+
+^
+src/models/robot.h:22:5: error: There is an unknown macro here somewhere. Configuration is required. If Q_PROPERTY is a macro then please configure it. [unknownMacro]
+    Q_PROPERTY(float kickspeedx READ getKickspeedx)
+    ^
+src/networks/receiver.h:37:9: error: There is an unknown macro here somewhere. Configuration is required. If slots is a macro then please configure it. [unknownMacro]
+private slots:
+        ^
+src/networks/sender.h:52:8: error: There is an unknown macro here somewhere. Configuration is required. If slots is a macro then please configure it. [unknownMacro]
+public slots:
+       ^
+src/utils/motionControl.cpp:0:0: information: Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches. [normalCheckLevelMaxBranches]
+
+^
+src/utils/motionControl.cpp:48:15: style: The scope of the variable 'newV' can be reduced. [variableScope]
+        float newV = bv + a * deltaTime * 2.0f;
+              ^

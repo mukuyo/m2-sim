@@ -1,6 +1,6 @@
 /.vscode/
 .DS_Store
-
+/config/config.ini
 /build/
 /assets/*
 !/assets/.gitkeep
