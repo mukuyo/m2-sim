@@ -1,6 +1,6 @@
 #include "observer.h"
 
-Observer::Observer(QObject *parent) : QObject(parent), visionReceiver(new VisionReceiver(nullptr)), controlBlueReceiver(new ControlBlueReceiver(nullptr)), controlYellowReceiver(new ControlYellowReceiver(nullptr)), config("../config/config.ini", QSettings::IniFormat) {
+Observer::Observer(QObject *parent) : QObject(parent), visionReceiver(new VisionReceiver(nullptr)), controlBlueReceiver(new ControlBlueReceiver(nullptr)), controlYellowReceiver(new ControlYellowReceiver(nullptr)), config("../config/config_v2.ini", QSettings::IniFormat) {
     visionMulticastAddress = config.value("Network/visionMulticastAddress", "127.0.0.1").toString();
     visionMulticastPort = config.value("Network/visionMulticastPort", 10020).toInt();
     commandListenPort = config.value("Network/commandListenPort", 20011).toInt();
@@ -20,6 +20,7 @@ Observer::Observer(QObject *parent) : QObject(parent), visionReceiver(new Vision
     gravity = config.value("Physics/Gravity", 9.81).toFloat();
     desiredFps = config.value("Physics/DesiredFps", 60.0).toFloat();
     ccdMode = config.value("Physics/CCD", true).toBool();
+    hideBallMode = config.value("Camera/HideBallModel", false).toBool();
 
     sender = new Sender(visionMulticastAddress.toStdString(), visionMulticastPort, this);
     visionReceiver->startListening(commandListenPort);
@@ -200,6 +201,11 @@ void Observer::setNumThreads(int threads) {
     config.setValue("Display/NumThreads", numThreads);
     emit settingChanged();
 }
+void Observer::setHideBallMode(bool mode) {
+    hideBallMode = mode;
+    config.setValue("Camera/HideBallModel", mode);
+    emit settingChanged();
+}
 
 void Observer::updateObjects(
     QList<QVector3D> blue_positions, 
@@ -210,7 +216,8 @@ void Observer::updateObjects(
     QList<bool> yellowBallCameraExists,
     QList<bool> bBotBallContacts, 
     QList<bool> yBotBallContacts,
-    QVector3D ball_position
+    QVector3D ball_position,
+    bool isFoundBall
 ) {
     bluePositions.clear();
     yellowPositions.clear();
@@ -220,7 +227,8 @@ void Observer::updateObjects(
     for (int i = 0; i < yellow_positions.size() && i < yellowRobotCount; ++i) {
         yellowPositions.append(yellow_positions[i]);
     }
-    this->ballPosition = ball_position;
+    if (isFoundBall)
+        this->ballPosition = ball_position;
     emit sendBotBallContacts(bBotBallContacts, yBotBallContacts, blueBallCameraExists, yellowBallCameraExists, blueBallPixels, yellowBallPixels);
 }
 

@@ -33,6 +33,8 @@ Window {
     property var selectedCamera: "Overview Camera"
     property real lastTime: 0
     property int key: 0
+    property var ballPosition: Qt.vector4d(0, 0, 0, 0)
+    property var isFoundBall: true
 
     Item {
         width: parent.width
@@ -136,6 +138,46 @@ Window {
 
             Observe {
                 id: observer
+            }
+            View3D {
+                id: viewport1
+                anchors.fill: parent
+                renderMode: View3D.Offscreen
+                Node {
+                    id: ceilingNode1
+                    PerspectiveCamera {
+                        id: ceilingCamera1
+                        clipFar: 20000
+                        clipNear: 1
+                        fieldOfView: 60
+                        position: Qt.vector3d(-3000, 6000, 0)
+                        eulerRotation: Qt.vector3d(-90, -90, 0)
+                    }
+                }
+                EmptyObjects {
+                    id: emptyObjects1
+                    property var emptyNum: 1
+                }
+            }
+            View3D {
+                id: viewport2
+                anchors.fill: parent
+                renderMode: View3D.Offscreen
+                Node {
+                    id: ceilingNode2
+                    PerspectiveCamera {
+                        id: ceilingCamera2
+                        clipFar: 20000
+                        clipNear: 1
+                        fieldOfView: 60
+                        position: Qt.vector3d(3000, 6000, 0)
+                        eulerRotation: Qt.vector3d(-90, 90, 0)
+                    }
+                }
+                EmptyObjects {
+                    id: emptyObjects2
+                    property var emptyNum: 2
+                }
             }
             View3D {
                 id: viewport
@@ -284,6 +326,7 @@ Window {
                         eulerRotation: Qt.vector3d(-47, 0, 0)
                     }
                 }
+
                 View {
                     id: view
                 }
@@ -330,7 +373,7 @@ Window {
                         let dy = event.y - lastPos.y;
                         
                         let results = viewport.pickAll(event.x, event.y);
-                       
+
                         for (let i = 0; i < results.length; i++) {
                             if (results[i].objectHit.objectName.startsWith("b") || results[i].objectHit.objectName.startsWith("y")) {
                                 selectBot = true;
@@ -416,6 +459,9 @@ Window {
             }
         }
     }
+    Camera {
+        id: cameraMain
+    }
     Connections {
         target: observer
         function onSettingChanged() {
@@ -426,7 +472,11 @@ Window {
             runTime = (Date.now() - lastTime);
 
             game_objects.syncGameObjects(runTime);
-            
+            if (observer.hideBallMode) {
+                isFoundBall = false;
+                emptyObjects1.syncEmptyObjects(runTime);
+                emptyObjects2.syncEmptyObjects(runTime);
+            }
             lastTime = Date.now();
             showRunTime = runTime;
         }
@@ -440,6 +490,10 @@ Window {
             } else if (game_objects.selectedRobotColor === "yellow") {
                 viewport.camera = game_objects.yBotsCamera[game_objects.botCursorID];
             }
+        } else if (selectedCamera == "Ceiling Camera Left") {
+            viewport.camera = ceilingCamera1;
+        } else if (selectedCamera == "Ceiling Camera Right") {
+            viewport.camera = ceilingCamera2;
         }
     }
 

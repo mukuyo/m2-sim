@@ -25,7 +25,6 @@ Node {
     property var selectedRobotColor: "blue"
     property real botCursorID: 0
     property var kickFlag: false
-    property var ballPosition: Qt.vector4d(0, 0, 0, 0)
     property var preBallPosition: Qt.vector4d(0, 0, 0, 0)
     property var ballAngularVelocity: Qt.vector4d(0, 0, 0, 0)
     property var preBallAngularPosition: Qt.vector4d(0, 0, 0, 0)
@@ -117,10 +116,9 @@ Node {
                 }
             }
             Model {
-                source: "#Cylinder"
+                source: "../../../assets/models/bot/Rione/viz/meshes/visualize.mesh"
                 pickable: true
                 objectName: "b"+String(index)
-                scale: Qt.vector3d(2.3, 1.2, 2.3)
                 eulerRotation: Qt.vector3d(-90, 0, 0)
             }
             Model {
@@ -222,10 +220,9 @@ Node {
                 }
             }
             Model {
-                source: "#Cylinder"
+                source: "../../../assets/models/bot/Rione/viz/meshes/visualize.mesh"
                 pickable: true
                 objectName: "y"+String(index)
-                scale: Qt.vector3d(2.3, 1.2, 2.3)
                 eulerRotation: Qt.vector3d(-90, 0, 0)
             }
             Model {
@@ -289,6 +286,8 @@ Node {
                 diameter: 42
             }
         ]
+        Ball {
+        }
     }
     Repeater3D {
         id: ballModels
@@ -402,7 +401,8 @@ Node {
             yellowBotData.cameraExists, 
             blueBotData.ballContacts, 
             yellowBotData.ballContacts,
-            ballPosition
+            ballPosition,
+            isFoundBall
         );
     }
 

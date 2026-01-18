@@ -37,6 +37,7 @@ Item {
     property real tempPenaltyAreaWidth: 0
     property real tempPenaltyAreaDepth: 0
     property int tempNumThreads: observer.numThreads
+    property bool tempHideBallMode: observer.hideBallMode
     // property real tempFieldWidth: observer.fieldWidth
     // property real tempFieldHeight: observer.fieldHeight
     // property real tempLineThickness: observer.lineThickness
@@ -47,7 +48,7 @@ Item {
     // property real tempPenaltyAreaDepth: observer.penaltyAreaDepth
 
 
-    property var cameraModel: ["Overview Camera", "Selected Robot"]
+    property var cameraModel: ["Overview Camera", "Selected Robot", "Ceiling Camera Left", "Ceiling Camera Right"]
     property bool isMenuRunning: false
 
     ListModel {
@@ -172,6 +173,7 @@ Item {
                     observer.rollingFriction = tempRollingFriction;
                     observer.kickerFriction = tempKickerFriction;
                     observer.numThreads = tempNumThreads;
+                    observer.hideBallMode = tempHideBallMode;
                     // observer.lineThickness = tempLineThickness;
                     // observer.goalWidth = tempGoalWidth;
                     // observer.goalHeight = tempGoalHeight;

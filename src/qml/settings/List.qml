@@ -54,6 +54,7 @@ Item {
     ListModel {
         id: cameraItems
         ListElement { name: "Main Camera"; detail: "Switch to one of the cameras"; slider: false; toggle: false; combo: true; InitValue: 0; MaxValue: -2 }
+        ListElement { name: "Hide Ball Model"; detail: "Toggle visibility of the ball model"; slider: false; toggle: true; combo: false; InitValue: 0; MaxValue: -2 }
         // ListElement { name: "Overview Camera Position"; detail: ""; slider: false; toggle: false; combo: false; InitValue: 0; MaxValue: -2; InitString: "0, 10, 20" }
         // ListElement { name: "Overview Camera Distance"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 10; MaxValue: 20 }
         // ListElement { name: "Overview Camera Height"; detail: ""; slider: true; toggle: false; combo: false; InitValue: 5; MaxValue: 10 }

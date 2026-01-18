@@ -36,6 +36,11 @@ QtObject {
             ballModels.children[0].position = Qt.vector3d(ballPosition.x, ballPosition.y, ballPosition.z);
         }
         ballMarker.position = Qt.vector3d(ballPosition.x, 5, ballPosition.z);
+        if (isFoundBall) {
+            ballMarker.children[0].materials[0].diffuseColor= "#EB392A";
+        } else {
+            ballMarker.children[0].materials[0].diffuseColor= "black";
+        }
     }
 
     function kick(color, frame, i, radian, ballVelocity) {
@@ -59,6 +64,7 @@ QtObject {
     }
 
     function updateID(color, frame, i, botIDTexts, botStatus, botIDRect, botBar) {
+
         let frame2D = camera.projectToScreen(
             Qt.vector3d(frame.position.x-15, frame.position.y + 128, frame.position.z-86.5), overviewCamera.position, overviewCamera.forward, overviewCamera.up, window.width, window.height, overviewCamera.fieldOfView, 1.0, 20000
         );
