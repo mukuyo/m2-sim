@@ -115,10 +115,10 @@ Item {
                     y: 34
                 }
                 ComboBox {
+                    id: comboBox
                     x: 165
-                    y: -26
                     model: cameraModel
-                    visible: model.name === "Main Camera"
+                    visible: false
                     onCurrentIndexChanged: {
                         selectedCamera = cameraModel[currentIndex];
                     }
@@ -281,6 +281,9 @@ Item {
                             tempKickerFriction = value.toFixed(2);
                         }
                     }
+                }
+                Component.onCompleted: {
+                    comboBox.visible = model.combo;
                 }
             }
         }

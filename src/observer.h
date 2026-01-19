@@ -42,6 +42,7 @@ class Observer : public QObject {
     Q_PROPERTY(float desiredFps READ getDesiredFps WRITE setDesiredFps NOTIFY settingChanged)
     Q_PROPERTY(bool ccdMode READ getCcdMode WRITE setCcdMode NOTIFY settingChanged)
     Q_PROPERTY(int numThreads READ getNumThreads WRITE setNumThreads NOTIFY settingChanged)
+    Q_PROPERTY(bool hideBallMode READ getHideBallMode WRITE setHideBallMode NOTIFY settingChanged)
     // Q_PROPERTY(int fieldWidth READ getFieldWidth WRITE setFieldWidth NOTIFY settingChanged)
     // Q_PROPERTY(int fieldHeight READ getFieldHeight WRITE setFieldHeight NOTIFY settingChanged)
     // Q_PROPERTY(int lineThickness READ getLineThickness WRITE setLineThickness NOTIFY settingChanged)
@@ -68,7 +69,8 @@ public:
         QList<bool> yellowBallCameraExists,
         QList<bool> bBotBallContacts, 
         QList<bool> yBotBallContacts, 
-        QVector3D ball_position
+        QVector3D ball_position,
+        bool isFoundBall
     );
 
     void start(quint16 port);
@@ -113,6 +115,7 @@ public:
     float getDesiredFps() const { return desiredFps; }
     bool getCcdMode() const { return ccdMode; }
     int getNumThreads() const { return numThreads; }
+    bool getHideBallMode() const { return hideBallMode; }
     
     void setWindowWidth(int width);
     void setWindowHeight(int height);
@@ -135,6 +138,7 @@ public:
     void setDesiredFps(int fps);
     void setCcdMode(bool mode);
     void setNumThreads(int threads);
+    void setHideBallMode(bool mode);
     void updateSimulator();
     
 signals:
@@ -192,6 +196,7 @@ private:
     float gravity;
     int desiredFps;
     bool ccdMode;
+    bool hideBallMode;
 
     QList<QVector3D> bluePositions;
     QList<QVector3D> yellowPositions;

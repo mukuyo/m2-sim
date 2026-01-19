@@ -25,7 +25,6 @@ Node {
     property var selectedRobotColor: "blue"
     property real botCursorID: 0
     property var kickFlag: false
-    property var ballPosition: Qt.vector4d(0, 0, 0, 0)
     property var preBallPosition: Qt.vector4d(0, 0, 0, 0)
     property var ballAngularVelocity: Qt.vector4d(0, 0, 0, 0)
     property var preBallAngularPosition: Qt.vector4d(0, 0, 0, 0)
@@ -117,11 +116,11 @@ Node {
                 }
             }
             Model {
-                source: "#Cylinder"
+                source: "../../../assets/models/bot/Rione/viz/meshes/visualize.mesh"
                 pickable: true
                 objectName: "b"+String(index)
-                scale: Qt.vector3d(2.3, 1.2, 2.3)
                 eulerRotation: Qt.vector3d(-90, 0, 0)
+                
             }
             Model {
                 source: "#Cylinder"
@@ -133,7 +132,6 @@ Node {
                     }
                 ]
             }
-
             Repeater3D {
                 model: 4
                 delegate: Model {
@@ -222,10 +220,9 @@ Node {
                 }
             }
             Model {
-                source: "#Cylinder"
+                source: "../../../assets/models/bot/Rione/viz/meshes/visualize.mesh"
                 pickable: true
                 objectName: "y"+String(index)
-                scale: Qt.vector3d(2.3, 1.2, 2.3)
                 eulerRotation: Qt.vector3d(-90, 0, 0)
             }
             Model {
@@ -289,6 +286,8 @@ Node {
                 diameter: 42
             }
         ]
+        Ball {
+        }
     }
     Repeater3D {
         id: ballModels
@@ -376,17 +375,18 @@ Node {
 
     function applyRollingFriction()
     {
-        let v = ballVelocity
-        let speed = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
-        if (speed < 0.001 || speed > 10 || ballPosition.y > 30) {
-            return;
-        }
-        let nx = -v.x / speed
-        let ny = -v.y / speed
-        let nz = -v.z / speed
-        let muu = observer.rollingFriction * 1000.0
-        let f = muu
-        ball.applyCentralImpulse(Qt.vector3d(nx * f, ny * f, nz * f))
+        // let v = ballVelocity
+        // let speed = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
+        // if (speed < 0.001 || speed > 10 || ballPosition.y > 30) {
+        //     return;
+        // }
+        // let nx = -v.x / speed
+        // let ny = -v.y / speed
+        // let nz = -v.z / speed
+        // let muu = observer.rollingFriction * 1000.0
+        // let f = muu
+        // console.log(nx*f, ny*f, nz*f)
+        // ball.applyCentralImpulse(Qt.vector3d(nx * f, ny * f, nz * f))
     }
 
     function syncGameObjects() {
@@ -402,7 +402,8 @@ Node {
             yellowBotData.cameraExists, 
             blueBotData.ballContacts, 
             yellowBotData.ballContacts,
-            ballPosition
+            ballPosition,
+            isFoundBall
         );
     }
 

@@ -45,6 +45,8 @@ Item {
                     tempLightFieldMode = !tempLightFieldMode
                 } else if (model.name === "Continuous Collision Detection") {
                     tempCCDMode = !tempCCDMode
+                } else if (model.name === "Hide Ball Model") {
+                    tempHideBallMode = !tempHideBallMode
                 }
             }
         }
@@ -61,6 +63,8 @@ Item {
                 switchState = tempLightFieldMode
             } else if (model.name === "Continuous Collision Detection") {
                 switchState = tempCCDMode
+            } else if (model.name === "Hide Ball Model") {
+                switchState = tempHideBallMode
             }
         }
     }
