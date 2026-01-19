@@ -120,6 +120,7 @@ Node {
                 pickable: true
                 objectName: "b"+String(index)
                 eulerRotation: Qt.vector3d(-90, 0, 0)
+                
             }
             Model {
                 source: "#Cylinder"
@@ -131,7 +132,6 @@ Node {
                     }
                 ]
             }
-
             Repeater3D {
                 model: 4
                 delegate: Model {
@@ -375,17 +375,18 @@ Node {
 
     function applyRollingFriction()
     {
-        let v = ballVelocity
-        let speed = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
-        if (speed < 0.001 || speed > 10 || ballPosition.y > 30) {
-            return;
-        }
-        let nx = -v.x / speed
-        let ny = -v.y / speed
-        let nz = -v.z / speed
-        let muu = observer.rollingFriction * 1000.0
-        let f = muu
-        ball.applyCentralImpulse(Qt.vector3d(nx * f, ny * f, nz * f))
+        // let v = ballVelocity
+        // let speed = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
+        // if (speed < 0.001 || speed > 10 || ballPosition.y > 30) {
+        //     return;
+        // }
+        // let nx = -v.x / speed
+        // let ny = -v.y / speed
+        // let nz = -v.z / speed
+        // let muu = observer.rollingFriction * 1000.0
+        // let f = muu
+        // console.log(nx*f, ny*f, nz*f)
+        // ball.applyCentralImpulse(Qt.vector3d(nx * f, ny * f, nz * f))
     }
 
     function syncGameObjects() {

@@ -1,6 +1,6 @@
 #include "observer.h"
 
-Observer::Observer(QObject *parent) : QObject(parent), visionReceiver(new VisionReceiver(nullptr)), controlBlueReceiver(new ControlBlueReceiver(nullptr)), controlYellowReceiver(new ControlYellowReceiver(nullptr)), config("../config/config_v2.ini", QSettings::IniFormat) {
+Observer::Observer(QObject *parent) : QObject(parent), visionReceiver(new VisionReceiver(nullptr)), controlBlueReceiver(new ControlBlueReceiver(nullptr)), controlYellowReceiver(new ControlYellowReceiver(nullptr)), config("../config/config.ini", QSettings::IniFormat) {
     visionMulticastAddress = config.value("Network/visionMulticastAddress", "127.0.0.1").toString();
     visionMulticastPort = config.value("Network/visionMulticastPort", 10020).toInt();
     commandListenPort = config.value("Network/commandListenPort", 20011).toInt();

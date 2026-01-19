@@ -9,7 +9,12 @@ Node {
             source: "../../../assets/models/bot/Rione/viz/meshes/visualize.mesh"
             pickable: true
             objectName: "tb"+String(index)
-            eulerRotation: Qt.vector3d(0, 0, 0)
+            eulerRotation: Qt.vector3d(-90, -90, 0)
+                materials: [
+                    DefaultMaterial {
+                        diffuseColor: "blue"
+                    }
+                ]
         }
     }
     Repeater3D {
@@ -19,12 +24,14 @@ Node {
             source: "../../../assets/models/bot/Rione/viz/meshes/visualize.mesh"
             pickable: true
             objectName: "ty"+String(index)
-            eulerRotation: Qt.vector3d(-90, 0, 0)
+            eulerRotation: Qt.vector3d(-90, 90, 0)
         }
     }
     Model {
         id: emptyBall
         source: "../../../assets/models/ball/meshes/ball.mesh"
+        scale: Qt.vector3d(20, 20, 20)
+        
     }
     
     function syncEmptyObjects() {
@@ -34,9 +41,9 @@ Node {
         for (var j = 0; j < yellow.num; j++) {
             yBotsEmpty.children[j].position = yellow.poses[j];
         }
-        let radians = [0, Math.PI/2, Math.PI, 3*Math.PI/2];
+        let radians = [0, 0, Math.PI/2, Math.PI, 3*Math.PI/2];
         for (var k = 0; k < 5; k++) {
-            if (k == 4) {
+            if (k == 0) {
                 emptyBall.position = Qt.vector3d(ballPosition.x, ballPosition.y, ballPosition.z);
             } else {
                 emptyBall.position = Qt.vector3d(ballPosition.x + (10*Math.cos(radians[k])), ballPosition.y, ballPosition.z + (10*Math.sin(radians[k])));
@@ -59,16 +66,13 @@ Node {
                 }
                 results = viewport2.pickAll(ball2D.x, ball2D.y);
             }
-            for (let n = 0; n < results.length; n++) {
-                console.log(results[n].objectHit.objectName);
-            }
-            
             if (results.length < 1) {
                 isFoundBall = true;
                 break;
             }
+            
         }
         // console.log(emptyNum);
-        console.log("---");
+        // console.log("---");
     }
 }
