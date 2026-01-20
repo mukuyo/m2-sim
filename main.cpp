@@ -1,27 +1,50 @@
-#include <QApplication>
+#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QDebug>
+#include <QCoreApplication>
 
 #include "src/observer.h"
 #include "src/models/camera.h"
 #include "src/utils/motionControl.h"
 #include "src/utils/mathUtils.h"
 
-class m2sim {
+class M2Sim
+{
 public:
-    explicit m2sim(QQmlApplicationEngine &engine) {
-        qmlRegisterType<Observer>("M2", 1, 0, "Observe");
+    explicit M2Sim(QQmlApplicationEngine &engine)
+    {
+        qmlRegisterType<Observer>("M2", 1, 0, "Observer");
         qmlRegisterType<Camera>("M2", 1, 0, "Camera");
         qmlRegisterType<MotionControl>("M2", 1, 0, "MotionControl");
         qmlRegisterType<MathUtils>("M2", 1, 0, "MathUtils");
-        engine.load(QUrl(QStringLiteral("../src/qml/Main.qml")));
+
+        const QUrl mainQmlUrl(
+            QCoreApplication::applicationDirPath() + "/qml/Main.qml"
+        );
+
+        QObject::connect(
+            &engine,
+            &QQmlApplicationEngine::objectCreated,
+            &engine,
+            [mainQmlUrl](QObject *obj, const QUrl &objUrl) {
+                if (!obj && objUrl == mainQmlUrl) {
+                    qCritical() << "Failed to load QML:" << mainQmlUrl;
+                    QCoreApplication::exit(-1);
+                }
+            },
+            Qt::QueuedConnection
+        );
+
+        engine.load(mainQmlUrl);
     }
 };
 
-int main(int argc, char *argv[]) {
-    QApplication app(argc, argv);
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
+
     QQmlApplicationEngine engine;
-    m2sim m2sim(engine);
-    (void) m2sim;
+    M2Sim sim(engine);
+
     return app.exec();
 }
