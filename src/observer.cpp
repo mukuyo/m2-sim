@@ -45,12 +45,11 @@ Observer::Observer(QObject *parent) : QObject(parent), visionReceiver(new Vision
     yellowRobotCount = config.value("Robot/yellowRobotCount", 11).toInt();
 
     numThreads = config.value("Display/NumThreads", -1).toInt();
-    frameInterval = 1000.0 / desiredFps;
 
-    QTimer *simTimer = new QTimer(this);
-    simTimer->setTimerType(Qt::PreciseTimer); // 高精度タイマー
+    simTimer = new QTimer(this);
+    simTimer->setTimerType(Qt::PreciseTimer);
     connect(simTimer, &QTimer::timeout, this, &Observer::updateSimulator);
-    simTimer->start(17); // 17ms 間隔
+    simTimer->start(17);
 }
 
 Observer::~Observer() {
@@ -64,6 +63,7 @@ void Observer::visionReceive(const mocSim_Packet packet) {
     bool isYellow = packet.commands().isteamyellow();
     for (const auto& command : packet.commands().robot_commands()) {
         int id = command.id();
+        if (id < 0 || id >= 16) continue;
         if (isYellow) {
             yellow_robots[id]->visionUpdate(command);
         } else {
@@ -219,30 +219,15 @@ void Observer::updateObjects(
     QVector3D ball_position,
     bool isFoundBall
 ) {
-    bluePositions.clear();
-    yellowPositions.clear();
-    for (int i = 0; i < blue_positions.size() && i < blueRobotCount; ++i) {
-        bluePositions.append(blue_positions[i]);
-    }
-    for (int i = 0; i < yellow_positions.size() && i < yellowRobotCount; ++i) {
-        yellowPositions.append(yellow_positions[i]);
-    }
+    bluePositions = blue_positions.mid(0, blueRobotCount);
+    yellowPositions = yellow_positions.mid(0, yellowRobotCount);
+
     if (isFoundBall)
         this->ballPosition = ball_position;
     emit sendBotBallContacts(bBotBallContacts, yBotBallContacts, blueBallCameraExists, yellowBallCameraExists, blueBallPixels, yellowBallPixels);
 }
 
-void Observer::updateSender() {
-    
-}
-
 void Observer::updateSimulator() {
-    qint64 now = elapsed.elapsed();
-    qint64 deltaMs = now - prevTimeMs;
-    prevTimeMs = now;
-    if (deltaMs > 0) {
-        fps = 1000.0 / deltaMs;   // FPS算出
-    }
     emit updateSimulationSignal();
     sender->send(1, ballPosition, bluePositions, yellowPositions);
 }

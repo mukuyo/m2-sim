@@ -18,9 +18,7 @@ public:
         qmlRegisterType<MotionControl>("M2", 1, 0, "MotionControl");
         qmlRegisterType<MathUtils>("M2", 1, 0, "MathUtils");
 
-        const QUrl mainQmlUrl(
-            "../src/qml/Main.qml"
-        );
+        const QUrl mainQmlUrl("../src/qml/Main.qml");
 
         QObject::connect(
             &engine,

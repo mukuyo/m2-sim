@@ -8,14 +8,12 @@
 #include <QSettings>
 #include <QTimer>
 #include <QElapsedTimer>
-#include <iostream>
+
 #include "networks/receiver.h"
 #include "networks/sender.h"
 #include "models/robot.h"
 #include "mocSim_Packet.pb.h"
 #include "ssl_simulation_robot_control.pb.h"
-
-using namespace std;
 
 class Observer : public QObject {
     Q_OBJECT
@@ -78,7 +76,6 @@ public:
 
     void visionReceive(mocSim_Packet packet);
     void controlReceive(RobotControl packet, bool isYellow);
-    void updateSender();
 
     QList<QObject*> getBlueRobots() const {
         QList<QObject*> blueList;
@@ -146,19 +143,19 @@ signals:
     void yellowRobotsChanged();
     void settingChanged();
     void sendBotBallContacts(
-        const QList<bool> &bBotBallContacts, 
-        const QList<bool> &yBotBallContacts,
-        const QList<bool> &bBallCameraExists,
-        const QList<bool> &yBallCameraExists,
-        const QList<QVector2D> &bBallCameraPositions,
-        const QList<QVector2D> &yBallCameraPositions
+        const QList<bool>& bBotBallContacts, 
+        const QList<bool>& yBotBallContacts,
+        const QList<bool>& bBallCameraExists,
+        const QList<bool>& yBallCameraExists,
+        const QList<QVector2D>& bBallCameraPositions,
+        const QList<QVector2D>& yBallCameraPositions
     );
     void updateSenderData(QVector3D ball, QList<QVector3D> blue, QList<QVector3D> yellow);
     void updateSimulationSignal();
 
 private:
     QSettings config;
-    QTimer *timer;
+    QTimer* simTimer = nullptr;
 
     VisionReceiver *visionReceiver;
     ControlBlueReceiver *controlBlueReceiver;
@@ -203,13 +200,6 @@ private:
     QVector3D ballPosition;
 
     RobotControlResponse robotControlResponse;
-
-    QElapsedTimer elapsedTimer;
-    QTimer *loopTimer;
-    float frameInterval;
-    QElapsedTimer elapsed;
-    qint64 prevTimeMs;
-    double fps;
 };
 
 #endif // OBSERVER_H
