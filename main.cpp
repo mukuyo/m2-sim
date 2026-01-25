@@ -19,7 +19,7 @@ public:
         qmlRegisterType<MathUtils>("M2", 1, 0, "MathUtils");
 
         const QUrl mainQmlUrl(
-            QCoreApplication::applicationDirPath() + "/qml/Main.qml"
+            "../src/qml/Main.qml"
         );
 
         QObject::connect(

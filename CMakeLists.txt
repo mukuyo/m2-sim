@@ -1,45 +1,52 @@
 cmake_minimum_required(VERSION 3.16)
-project(m2-Sim)
+project(m2-Sim LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC OFF)
 
+# ===============================
+# Platform settings
+# ===============================
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
-        # Apple Silicon (Homebrew)
         set(Protobuf_INCLUDE_DIR "/opt/homebrew/opt/protobuf@21/include")
         set(Protobuf_LIBRARIES "/opt/homebrew/opt/protobuf@21/lib/libprotobuf.dylib")
         set(CMAKE_PREFIX_PATH "/opt/homebrew/opt/boost@1.85" ${CMAKE_PREFIX_PATH})
-        include_directories("/opt/homebrew/opt/protobuf@21/include")
     else()
-        # Intel Mac
         set(Protobuf_INCLUDE_DIR "/usr/local/Cellar/protobuf@21/21.12_1/include")
         set(Protobuf_LIBRARIES "/usr/local/Cellar/protobuf@21/21.12_1/lib/libprotobuf.dylib")
         set(CMAKE_PREFIX_PATH "/usr/local/opt/boost@1.85/" ${CMAKE_PREFIX_PATH})
-        include_directories("/usr/local/Cellar/protobuf@21/21.12_1/include")
     endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    # Linux-specific settings can be added here
+    # Linux settings here
 else()
     message(FATAL_ERROR "Unsupported platform")
 endif()
 
+# ===============================
+# Qt
+# ===============================
 find_package(Qt6 REQUIRED COMPONENTS
     Core Gui Widgets
     3DCore 3DExtras 3DRender
     Quick Quick3D Quick3DPhysics Qml
 )
 
+# ===============================
+# Boost / Protobuf
+# ===============================
 find_package(Boost REQUIRED)
 
-# Protobuf
 set(protobuf_MODULE_COMPATIBLE TRUE)
 find_package(Protobuf 3.21.12 REQUIRED)
 
+# ===============================
+# Source layout
+# ===============================
 set(SRC_DIR        ${CMAKE_SOURCE_DIR}/src)
 set(MODEL_DIR      ${SRC_DIR}/models)
 set(NET_DIR        ${SRC_DIR}/networks)
@@ -75,6 +82,9 @@ protobuf_generate_cpp(
     PROTOC_OUT_DIR ${PROTO_GEN_DIR}
 )
 
+# ===============================
+# Executable
+# ===============================
 add_executable(m2-Sim
     main.cpp
     ${SRC_FILES}
@@ -82,12 +92,14 @@ add_executable(m2-Sim
     ${PROTO_SRCS}
 )
 
+# ===============================
+# Include / Link
+# ===============================
 target_include_directories(m2-Sim PRIVATE
     ${SRC_DIR}
     ${PROTO_GEN_DIR}
     ${Boost_INCLUDE_DIRS}
     ${Protobuf_INCLUDE_DIRS}
-    ${PROTOBUF_ROOT}/include
 )
 
 target_link_libraries(m2-Sim PRIVATE
@@ -105,29 +117,17 @@ target_link_libraries(m2-Sim PRIVATE
     pthread
 )
 
+# ===============================
+# Output
+# ===============================
 set_target_properties(m2-Sim PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
-# Custom target to run the application
+# ===============================
+# Run helper
+# ===============================
 add_custom_target(run
     COMMAND ${CMAKE_BINARY_DIR}/bin/m2-Sim
     DEPENDS m2-Sim
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-)
-
-# Copy QML files next to the executable
-add_custom_command(TARGET m2-Sim POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/src/qml
-    $<TARGET_FILE_DIR:m2-Sim>/qml
-)
-
-install(TARGETS m2-Sim
-    RUNTIME DESTINATION bin
-)
-
-install(DIRECTORY ${SRC_DIR}/
-    DESTINATION include/m2-sim
-    FILES_MATCHING PATTERN "*.h"
 )

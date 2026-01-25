@@ -11,7 +11,6 @@ import "../../../assets/models/bot/Rione/rigid_body" as BlueLightBody
 import "../../../assets/models/bot/Rione/viz" as YellowBody
 import "../../../assets/models/bot/Rione/rigid_body" as YellowLightBody
 import "../../../assets/models/ball/"
-import "../../../assets/models/circle/ball/"
 import "../../../assets/models/circle/ballMarker/"
 
 Node {
@@ -468,6 +467,7 @@ Node {
         }
     }
     Component.onCompleted: {
+        
         for (let i = 0; i < observer.blueRobotCount; i++) {
             let frame = bBotsFrame.children[i];
             frame.reset(Qt.vector3d(frame.position.x, 0, frame.position.z), Qt.vector3d(0, blue.poses[i].w, 0));

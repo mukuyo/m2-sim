@@ -136,7 +136,7 @@ Window {
             color: "#848895"
             border.color: "black"
 
-            Observe {
+            Observer {
                 id: observer
             }
             View3D {

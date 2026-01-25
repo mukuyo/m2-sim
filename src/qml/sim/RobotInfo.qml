@@ -11,7 +11,6 @@ import "../../../assets/models/bot/Rione/rigid_body" as BlueLightBody
 import "../../../assets/models/bot/Rione/viz" as YellowBody
 import "../../../assets/models/bot/Rione/rigid_body" as YellowLightBody
 import "../../../assets/models/ball/"
-import "../../../assets/models/circle/ball/"
 
 QtObject {
     property real num: 0
