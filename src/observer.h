@@ -55,8 +55,8 @@ class Observer : public QObject {
     // Q_PROPERTY(int penaltyHeight READ getPenaltyHeight WRITE setPenaltyHeight NOTIFY settingChanged)
 
 public:
+    static constexpr int MaxRobots = 16;
     explicit Observer(QObject *parent = nullptr);
-    ~Observer();
 
     Q_INVOKABLE void updateObjects(
         QList<QVector3D> blue_positions, 
@@ -80,14 +80,14 @@ public:
     QList<QObject*> getBlueRobots() const {
         QList<QObject*> blueList;
         for (int i = 0; i < blueRobotCount; ++i) {
-            blueList.append(blue_robots[i]);
+            blueList.append(blueRobots[i]);
         }
         return blueList;
     }
     QList<QObject*> getYellowRobots() const {
         QList<QObject*> yellowList;
         for (int i = 0; i < yellowRobotCount; ++i) {
-            yellowList.append(yellow_robots[i]);
+            yellowList.append(yellowRobots[i]);
         }
         return yellowList;
     }
@@ -163,8 +163,8 @@ private:
 
     Sender *sender;
 
-    Robot *blue_robots[16];
-    Robot *yellow_robots[16];
+    std::array<Robot*, 16> blueRobots;
+    std::array<Robot*, 16> yellowRobots;
 
     int windowWidth;
     int windowHeight;
