@@ -72,7 +72,5 @@ Node {
             }
             
         }
-        // console.log(emptyNum);
-        // console.log("---");
     }
 }

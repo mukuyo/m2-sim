@@ -37,22 +37,10 @@ class Observer : public QObject {
     Q_PROPERTY(float rollingFriction READ getRollingFriction WRITE setRollingFriction NOTIFY settingChanged)
     Q_PROPERTY(float kickerFriction READ getKickerFriction WRITE setKickerFriction NOTIFY settingChanged)
     Q_PROPERTY(float gravity READ getGravity WRITE setGravity NOTIFY settingChanged)
-    Q_PROPERTY(float desiredFps READ getDesiredFps WRITE setDesiredFps NOTIFY settingChanged)
+    Q_PROPERTY(int desiredFps READ getDesiredFps WRITE setDesiredFps NOTIFY settingChanged)
     Q_PROPERTY(bool ccdMode READ getCcdMode WRITE setCcdMode NOTIFY settingChanged)
     Q_PROPERTY(int numThreads READ getNumThreads WRITE setNumThreads NOTIFY settingChanged)
     Q_PROPERTY(bool hideBallMode READ getHideBallMode WRITE setHideBallMode NOTIFY settingChanged)
-    // Q_PROPERTY(int fieldWidth READ getFieldWidth WRITE setFieldWidth NOTIFY settingChanged)
-    // Q_PROPERTY(int fieldHeight READ getFieldHeight WRITE setFieldHeight NOTIFY settingChanged)
-    // Q_PROPERTY(int lineThickness READ getLineThickness WRITE setLineThickness NOTIFY settingChanged)
-    // Q_PROPERTY(int centerCircleRadius READ getCenterCircleRadius WRITE setCenterCircleRadius NOTIFY settingChanged)
-    // Q_PROPERTY(int goalWidth READ getGoalWidth WRITE setGoalWidth NOTIFY settingChanged)
-    // Q_PROPERTY(int goalDepth READ getGoalDepth WRITE setGoalDepth NOTIFY settingChanged)
-    // Q_PROPERTY(int goalHeight READ getGoalHeight WRITE setGoalHeight NOTIFY settingChanged)
-    // Q_PROPERTY(int goalThickness READ getGoalThickness WRITE setGoalThickness NOTIFY settingChanged)
-    // Q_PROPERTY(int wallThickness READ getWallThickness WRITE setWallThickness NOTIFY settingChanged)
-    // Q_PROPERTY(int penaltyPoint READ getPenaltyPoint WRITE setPenaltyPoint NOTIFY settingChanged)
-    // Q_PROPERTY(int penaltyWidth READ getPenaltyWidth WRITE setPenaltyWidth NOTIFY settingChanged)
-    // Q_PROPERTY(int penaltyHeight READ getPenaltyHeight WRITE setPenaltyHeight NOTIFY settingChanged)
 
 public:
     static constexpr int MaxRobots = 16;
@@ -74,8 +62,8 @@ public:
     void start(quint16 port);
     void stop();
 
-    void visionReceive(mocSim_Packet packet);
-    void controlReceive(RobotControl packet, bool isYellow);
+    void visionReceive(const mocSim_Packet& packet);
+    void controlReceive(const RobotControl& packet, bool isYellow);
 
     QList<QObject*> getBlueRobots() const {
         QList<QObject*> blueList;
@@ -109,7 +97,7 @@ public:
     float getRollingFriction() const { return rollingFriction; }
     float getKickerFriction() const { return kickerFriction; }
     float getGravity() const { return gravity; }
-    float getDesiredFps() const { return desiredFps; }
+    int getDesiredFps() const { return desiredFps; }
     bool getCcdMode() const { return ccdMode; }
     int getNumThreads() const { return numThreads; }
     bool getHideBallMode() const { return hideBallMode; }
@@ -163,8 +151,8 @@ private:
 
     Sender *sender;
 
-    std::array<Robot*, 16> blueRobots;
-    std::array<Robot*, 16> yellowRobots;
+    std::array<Robot*, MaxRobots> blueRobots;
+    std::array<Robot*, MaxRobots> yellowRobots;
 
     int windowWidth;
     int windowHeight;

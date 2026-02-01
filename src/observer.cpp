@@ -18,9 +18,9 @@ Observer::Observer(QObject *parent) : QObject(parent), config("../config/config.
     rollingFriction = config.value("Physics/RollingFriction", 0.04).toFloat();
     kickerFriction = config.value("Physics/KickerFriction", 0.8).toFloat();
     gravity = config.value("Physics/Gravity", 9.81).toFloat();
-    desiredFps = config.value("Physics/DesiredFps", 60.0).toFloat();
+    desiredFps = config.value("Physics/DesiredFps", 60).toInt();
     ccdMode = config.value("Physics/CCD", true).toBool();
-    hideBallMode = config.value("Camera/HideBallModel", false).toBool();
+    hideBallMode = config.value("Camera/HideBallMode", false).toBool();
 
     sender = new Sender(visionMulticastAddress.toStdString(), visionMulticastPort, this);
     visionReceiver = new VisionReceiver(this);
@@ -37,7 +37,7 @@ Observer::Observer(QObject *parent) : QObject(parent), config("../config/config.
     connect(this, &Observer::sendBotBallContacts, controlBlueReceiver, &ControlBlueReceiver::updateBallContacts);
     connect(this, &Observer::sendBotBallContacts, controlYellowReceiver, &ControlYellowReceiver::updateBallContacts);
 
-    for (int i = 0; i < 16; ++i) {
+    for (int i = 0; i < MaxRobots; ++i) {
         blueRobots[i] = new Robot(this);
         yellowRobots[i] = new Robot(this);
     }
@@ -56,11 +56,11 @@ Observer::Observer(QObject *parent) : QObject(parent), config("../config/config.
     simTimer->start(17);
 }
 
-void Observer::visionReceive(const mocSim_Packet packet) {
+void Observer::visionReceive(const mocSim_Packet& packet) {
     bool isYellow = packet.commands().isteamyellow();
     for (const auto& command : packet.commands().robot_commands()) {
         int id = command.id();
-        if (id < 0 || id >= 16) continue;
+        if (id < 0 || id >= MaxRobots) continue;
         if (isYellow) {
             yellowRobots[id]->visionUpdate(command);
         } else {
@@ -71,11 +71,11 @@ void Observer::visionReceive(const mocSim_Packet packet) {
     else emit blueRobotsChanged();
 }
 
-void Observer::controlReceive(const RobotControl packet, bool isYellow) {
+void Observer::controlReceive(const RobotControl& packet, bool isYellow) {
     int receive_count = 0;
     for (const auto& robotCommand : packet.robot_commands()) {
         int id = robotCommand.id();
-        if (id < 0 || id >= 16) continue;
+        if (id < 0 || id >= MaxRobots) continue;
         if (!robotCommand.has_move_command()) continue;
         if (isYellow) {
             yellowRobots[id]->controlUpdate(robotCommand);
@@ -201,7 +201,7 @@ void Observer::setNumThreads(int threads) {
 }
 void Observer::setHideBallMode(bool mode) {
     hideBallMode = mode;
-    config.setValue("Camera/HideBallModel", mode);
+    config.setValue("Camera/HideBallMode", mode);
     emit settingChanged();
 }
 
