@@ -21,6 +21,7 @@ Window {
     width: windowWidth
     height: windowHeight
     visible: true
+    color: "#202020"
     flags: Qt.ExpandedClientAreaHint | Qt.NoTitleBarBackgroundHint
     property int windowWidth: observer.windowWidth
     property int windowHeight: observer.windowHeight
@@ -54,6 +55,7 @@ Window {
             forceDebugDraw: observer.forceDebugDrawMode
             onFrameDone: (timestep) => {
                 game_objects.updateGameObjects(runTime);
+                game_objects.syncGameObjects(runTime);
             }
         }
         Timer {
@@ -62,6 +64,7 @@ Window {
             repeat: true
             onTriggered: {
                 game_objects.updateBallModel();
+                
             }
         }
         RobotInfo {
@@ -139,46 +142,46 @@ Window {
             Observer {
                 id: observer
             }
-            View3D {
-                id: viewport1
-                anchors.fill: parent
-                renderMode: View3D.Offscreen
-                Node {
-                    id: ceilingNode1
-                    PerspectiveCamera {
-                        id: ceilingCamera1
-                        clipFar: 20000
-                        clipNear: 1
-                        fieldOfView: 60
-                        position: Qt.vector3d(-3000, 6000, 0)
-                        eulerRotation: Qt.vector3d(-90, -90, 0)
-                    }
-                }
-                EmptyObjects {
-                    id: emptyObjects1
-                    property var emptyNum: 1
-                }
-            }
-            View3D {
-                id: viewport2
-                anchors.fill: parent
-                renderMode: View3D.Offscreen
-                Node {
-                    id: ceilingNode2
-                    PerspectiveCamera {
-                        id: ceilingCamera2
-                        clipFar: 20000
-                        clipNear: 1
-                        fieldOfView: 60
-                        position: Qt.vector3d(3000, 6000, 0)
-                        eulerRotation: Qt.vector3d(-90, 90, 0)
-                    }
-                }
-                EmptyObjects {
-                    id: emptyObjects2
-                    property var emptyNum: 2
-                }
-            }
+            // View3D {
+            //     id: viewport1
+            //     anchors.fill: parent
+            //     renderMode: View3D.Offscreen
+            //     Node {
+            //         id: ceilingNode1
+            //         PerspectiveCamera {
+            //             id: ceilingCamera1
+            //             clipFar: 20000
+            //             clipNear: 1
+            //             fieldOfView: 60
+            //             position: Qt.vector3d(-3000, 6000, 0)
+            //             eulerRotation: Qt.vector3d(-90, -90, 0)
+            //         }
+            //     }
+            //     EmptyObjects {
+            //         id: emptyObjects1
+            //         property var emptyNum: 1
+            //     }
+            // }
+            // View3D {
+            //     id: viewport2
+            //     anchors.fill: parent
+            //     renderMode: View3D.Offscreen
+            //     Node {
+            //         id: ceilingNode2
+            //         PerspectiveCamera {
+            //             id: ceilingCamera2
+            //             clipFar: 20000
+            //             clipNear: 1
+            //             fieldOfView: 60
+            //             position: Qt.vector3d(3000, 6000, 0)
+            //             eulerRotation: Qt.vector3d(-90, 90, 0)
+            //         }
+            //     }
+            //     EmptyObjects {
+            //         id: emptyObjects2
+            //         property var emptyNum: 2
+            //     }
+            // }
             View3D {
                 id: viewport
                 anchors.fill: parent
@@ -471,7 +474,7 @@ Window {
         function onUpdateSimulationSignal() {
             runTime = (Date.now() - lastTime);
 
-            game_objects.syncGameObjects(runTime);
+            
             if (observer.hideBallMode) {
                 isFoundBall = false;
                 emptyObjects1.syncEmptyObjects(runTime);

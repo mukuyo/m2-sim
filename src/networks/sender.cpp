@@ -44,12 +44,12 @@ void Sender::send(int camera_num, QVector3D ball_position, QList<QVector3D> blue
         detection.set_t_capture(t_capture);
         detection.set_t_sent(t_capture);
         detection.set_camera_id(i);
-
+        // if (i == 0)
         setDetectionInfo(detection, i, ball_position, blue_positions, yellow_positions);
 
         packet.mutable_detection()->CopyFrom(detection);
 
-        if (geometryCount % 20 == 0) {
+        if (geometryCount % 1000 == 0) {
             packet.mutable_geometry()->CopyFrom(setGeometryInfo());
         } 
         
@@ -252,29 +252,4 @@ SSL_GeometryData Sender::setGeometryInfo() {
 
 
     return geometry;
-}
-
-SenderWorker::SenderWorker(Sender *sender, QObject *parent)
-    : QObject(parent), sender(sender) {
-    timer = new QTimer(this);
-    timer->setInterval(17); // 60fps 相当
-    connect(timer, &QTimer::timeout, this, &SenderWorker::doSend);
-}
-
-void SenderWorker::start() {
-    timer->start();
-}
-
-void SenderWorker::stop() {
-    timer->stop();
-}
-
-void SenderWorker::updateData(QVector3D ball, QList<QVector3D> blue, QList<QVector3D> yellow) {
-    ballPosition = ball;
-    bluePositions = blue;
-    yellowPositions = yellow;
-}
-
-void SenderWorker::doSend() {
-    sender->send(1, ballPosition, bluePositions, yellowPositions);
 }

@@ -44,25 +44,4 @@ private:
     string address;
 };
 
-class SenderWorker : public QObject {
-    Q_OBJECT
-public:
-    explicit SenderWorker(Sender *sender, QObject *parent = nullptr);
-
-public slots:
-    void start();
-    void stop();
-    void updateData(QVector3D ball, QList<QVector3D> blue, QList<QVector3D> yellow);
-
-private slots:
-    void doSend();
-
-private:
-    Sender *sender;
-    QTimer *timer;
-    QVector3D ballPosition;
-    QList<QVector3D> bluePositions;
-    QList<QVector3D> yellowPositions;
-};
-
 #endif // SENDER_H
