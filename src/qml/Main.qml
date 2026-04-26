@@ -54,6 +54,7 @@ Window {
             forceDebugDraw: observer.forceDebugDrawMode
             onFrameDone: (timestep) => {
                 game_objects.updateGameObjects(runTime);
+                game_objects.syncGameObjects(runTime);
             }
         }
         Timer {
@@ -62,6 +63,7 @@ Window {
             repeat: true
             onTriggered: {
                 game_objects.updateBallModel();
+                
             }
         }
         RobotInfo {
@@ -120,6 +122,8 @@ Window {
                 game_objects.test();
             } else if (event.key === Qt.Key_P) {
                 game_objects.placeClothLineBall();
+            } else if (event.key === Qt.Key_R) {
+                key = Qt.Key_R;
             }
         }
         Keys.onReleased: (event) => {
@@ -136,7 +140,7 @@ Window {
             color: "#848895"
             border.color: "black"
 
-            Observe {
+            Observer {
                 id: observer
             }
             View3D {
@@ -342,7 +346,7 @@ Window {
                     property bool isDraggingWindow: false
                     property bool selectView: false
                     property bool selectBot: false
-                    // hoverEnabled: true
+                    hoverEnabled: true
 
                     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
@@ -417,26 +421,24 @@ Window {
                         lastPos = Qt.point(event.x, event.y);
                     }
 
-                    onWheel: (wheel) => {
-                        let rz = wheel.angleDelta.y * dt * linearSpeed
-                        let rx = -wheel.angleDelta.x * dt * linearSpeed
+onWheel: (wheel) => {
+    let rz = wheel.angleDelta.y * dt * linearSpeed
+    let rx = -wheel.angleDelta.x * dt * linearSpeed
 
-                        let forward = overviewCamera.forward
-                        let right = overviewCamera.right
-                        let distance = overviewCamera.position.length()
+    let forward = overviewCamera.forward
+    let right = overviewCamera.right
 
-                        if (rz > 0 && distance < zoomLimit) return
-
-                        overviewCamera.position.x += rx * right.x + rz * forward.x
-                        overviewCamera.position.z += rx * right.z + rz * forward.z
-                    }
+    // Y成分も含めて移動
+    overviewCamera.position.x += rx * right.x + rz * forward.x
+    overviewCamera.position.y += rz * forward.y   // ← これを追加
+    overviewCamera.position.z += rx * right.z + rz * forward.z
+}
                     Setting {
                         id: setting
                         property var windowWidth : window.width
                         property var windowHeight : window.height
                         property var visionMulticastPort: observer.visionMulticastPort
                     }
-
                 }
                 Node {
                     id: node
@@ -471,7 +473,6 @@ Window {
         function onUpdateSimulationSignal() {
             runTime = (Date.now() - lastTime);
 
-            game_objects.syncGameObjects(runTime);
             if (observer.hideBallMode) {
                 isFoundBall = false;
                 emptyObjects1.syncEmptyObjects(runTime);

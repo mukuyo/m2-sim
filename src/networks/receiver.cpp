@@ -174,6 +174,7 @@ void ControlYellowReceiver::updateBallContacts(
     this->botBallContacts = yBotBallContacts;
     this->ballCameraExists = yBallCameraExists;
     this->ballCameraPositions = yBallCameraPositions;
+
 }
 
 void ControlYellowReceiver::stopListening() {

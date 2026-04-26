@@ -8,14 +8,12 @@
 #include <QSettings>
 #include <QTimer>
 #include <QElapsedTimer>
-#include <iostream>
+
 #include "networks/receiver.h"
 #include "networks/sender.h"
 #include "models/robot.h"
 #include "mocSim_Packet.pb.h"
 #include "ssl_simulation_robot_control.pb.h"
-
-using namespace std;
 
 class Observer : public QObject {
     Q_OBJECT
@@ -39,26 +37,14 @@ class Observer : public QObject {
     Q_PROPERTY(float rollingFriction READ getRollingFriction WRITE setRollingFriction NOTIFY settingChanged)
     Q_PROPERTY(float kickerFriction READ getKickerFriction WRITE setKickerFriction NOTIFY settingChanged)
     Q_PROPERTY(float gravity READ getGravity WRITE setGravity NOTIFY settingChanged)
-    Q_PROPERTY(float desiredFps READ getDesiredFps WRITE setDesiredFps NOTIFY settingChanged)
+    Q_PROPERTY(int desiredFps READ getDesiredFps WRITE setDesiredFps NOTIFY settingChanged)
     Q_PROPERTY(bool ccdMode READ getCcdMode WRITE setCcdMode NOTIFY settingChanged)
     Q_PROPERTY(int numThreads READ getNumThreads WRITE setNumThreads NOTIFY settingChanged)
     Q_PROPERTY(bool hideBallMode READ getHideBallMode WRITE setHideBallMode NOTIFY settingChanged)
-    // Q_PROPERTY(int fieldWidth READ getFieldWidth WRITE setFieldWidth NOTIFY settingChanged)
-    // Q_PROPERTY(int fieldHeight READ getFieldHeight WRITE setFieldHeight NOTIFY settingChanged)
-    // Q_PROPERTY(int lineThickness READ getLineThickness WRITE setLineThickness NOTIFY settingChanged)
-    // Q_PROPERTY(int centerCircleRadius READ getCenterCircleRadius WRITE setCenterCircleRadius NOTIFY settingChanged)
-    // Q_PROPERTY(int goalWidth READ getGoalWidth WRITE setGoalWidth NOTIFY settingChanged)
-    // Q_PROPERTY(int goalDepth READ getGoalDepth WRITE setGoalDepth NOTIFY settingChanged)
-    // Q_PROPERTY(int goalHeight READ getGoalHeight WRITE setGoalHeight NOTIFY settingChanged)
-    // Q_PROPERTY(int goalThickness READ getGoalThickness WRITE setGoalThickness NOTIFY settingChanged)
-    // Q_PROPERTY(int wallThickness READ getWallThickness WRITE setWallThickness NOTIFY settingChanged)
-    // Q_PROPERTY(int penaltyPoint READ getPenaltyPoint WRITE setPenaltyPoint NOTIFY settingChanged)
-    // Q_PROPERTY(int penaltyWidth READ getPenaltyWidth WRITE setPenaltyWidth NOTIFY settingChanged)
-    // Q_PROPERTY(int penaltyHeight READ getPenaltyHeight WRITE setPenaltyHeight NOTIFY settingChanged)
 
 public:
+    static constexpr int MaxRobots = 16;
     explicit Observer(QObject *parent = nullptr);
-    ~Observer();
 
     Q_INVOKABLE void updateObjects(
         QList<QVector3D> blue_positions, 
@@ -76,21 +62,20 @@ public:
     void start(quint16 port);
     void stop();
 
-    void visionReceive(mocSim_Packet packet);
-    void controlReceive(RobotControl packet, bool isYellow);
-    void updateSender();
+    void visionReceive(const mocSim_Packet& packet);
+    void controlReceive(const RobotControl& packet, bool isYellow);
 
     QList<QObject*> getBlueRobots() const {
         QList<QObject*> blueList;
         for (int i = 0; i < blueRobotCount; ++i) {
-            blueList.append(blue_robots[i]);
+            blueList.append(blueRobots[i]);
         }
         return blueList;
     }
     QList<QObject*> getYellowRobots() const {
         QList<QObject*> yellowList;
         for (int i = 0; i < yellowRobotCount; ++i) {
-            yellowList.append(yellow_robots[i]);
+            yellowList.append(yellowRobots[i]);
         }
         return yellowList;
     }
@@ -112,7 +97,7 @@ public:
     float getRollingFriction() const { return rollingFriction; }
     float getKickerFriction() const { return kickerFriction; }
     float getGravity() const { return gravity; }
-    float getDesiredFps() const { return desiredFps; }
+    int getDesiredFps() const { return desiredFps; }
     bool getCcdMode() const { return ccdMode; }
     int getNumThreads() const { return numThreads; }
     bool getHideBallMode() const { return hideBallMode; }
@@ -146,19 +131,19 @@ signals:
     void yellowRobotsChanged();
     void settingChanged();
     void sendBotBallContacts(
-        const QList<bool> &bBotBallContacts, 
-        const QList<bool> &yBotBallContacts,
-        const QList<bool> &bBallCameraExists,
-        const QList<bool> &yBallCameraExists,
-        const QList<QVector2D> &bBallCameraPositions,
-        const QList<QVector2D> &yBallCameraPositions
+        const QList<bool>& bBotBallContacts, 
+        const QList<bool>& yBotBallContacts,
+        const QList<bool>& bBallCameraExists,
+        const QList<bool>& yBallCameraExists,
+        const QList<QVector2D>& bBallCameraPositions,
+        const QList<QVector2D>& yBallCameraPositions
     );
     void updateSenderData(QVector3D ball, QList<QVector3D> blue, QList<QVector3D> yellow);
     void updateSimulationSignal();
 
 private:
     QSettings config;
-    QTimer *timer;
+    QTimer* simTimer = nullptr;
 
     VisionReceiver *visionReceiver;
     ControlBlueReceiver *controlBlueReceiver;
@@ -166,8 +151,8 @@ private:
 
     Sender *sender;
 
-    Robot *blue_robots[16];
-    Robot *yellow_robots[16];
+    std::array<Robot*, MaxRobots> blueRobots;
+    std::array<Robot*, MaxRobots> yellowRobots;
 
     int windowWidth;
     int windowHeight;
@@ -203,13 +188,6 @@ private:
     QVector3D ballPosition;
 
     RobotControlResponse robotControlResponse;
-
-    QElapsedTimer elapsedTimer;
-    QTimer *loopTimer;
-    float frameInterval;
-    QElapsedTimer elapsed;
-    qint64 prevTimeMs;
-    double fps;
 };
 
 #endif // OBSERVER_H
