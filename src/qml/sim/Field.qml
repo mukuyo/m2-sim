@@ -47,18 +47,55 @@ Node {
         scaleV: 4
         scaleU: 4
     }
-    Model {
-        id: topWall
-        pickable: true
-        source: "#Cube"
-        scale: Qt.vector3d(126.2, 3, 0.2)
-        position: Qt.vector3d(0, 50, -4810)
-        materials: [
-            DefaultMaterial {
-                diffuseColor: "black"
-            }
-        ]
+    // Texture {
+    //     id: groundTexture
+    //     source: "../../../assets/textures/field_texture.png"
+    // }
+    // Model {
+    //     id: topWall
+    //     pickable: true
+    //     source: "#Cube"
+    //     scale: Qt.vector3d(126.2, 3, 0.2)
+    //     position: Qt.vector3d(0, 50, -4810)
+    //     materials: [
+    //         DefaultMaterial {
+    //             diffuseColor: "black"
+    //         }
+    //     ]
+    // }
+Texture {
+    id: rioneLogo
+    source: "../../../assets/textures/Ri-one.png"
+    tilingModeHorizontal: Texture.Repeat
+    scaleU: 16
+    scaleV: 1
+
+    positionU: 0
+
+    NumberAnimation on positionU {
+        from: 0
+        to: 1
+        duration: 2000
+        loops: Animation.Infinite
     }
+}
+
+Model {
+    id: topWall
+    source: "#Cube"
+    scale: Qt.vector3d(126.2, 2, 0.2)
+    position: Qt.vector3d(0, 100, -4810)
+
+    materials: [
+        // PrincipledMaterial {
+        //     baseColorMap: rioneLogo
+        // }
+        DefaultMaterial {
+            diffuseColor: "black"
+        }
+    ]
+}
+
     StaticRigidBody {
         id: topWallSecret
         objectName: "topWallSecret"
@@ -92,10 +129,13 @@ Node {
     Model {
         id: leftWall
         source: "#Cube"
-        scale: Qt.vector3d(96.2, 3, 0.2)
-        position: Qt.vector3d(-6310, 50, 0)
+        scale: Qt.vector3d(96.2, 2, 0.2)
+        position: Qt.vector3d(-6310, 100, 0)
         eulerRotation: Qt.vector3d(0, 90, 0)
         materials: [
+            // PrincipledMaterial {
+            //     baseColorMap: rioneLogo
+            // }
             DefaultMaterial {
                 diffuseColor: "black"
             }

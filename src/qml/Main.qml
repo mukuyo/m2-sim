@@ -21,7 +21,6 @@ Window {
     width: windowWidth
     height: windowHeight
     visible: true
-    color: "#202020"
     flags: Qt.ExpandedClientAreaHint | Qt.NoTitleBarBackgroundHint
     property int windowWidth: observer.windowWidth
     property int windowHeight: observer.windowHeight
@@ -123,6 +122,8 @@ Window {
                 game_objects.test();
             } else if (event.key === Qt.Key_P) {
                 game_objects.placeClothLineBall();
+            } else if (event.key === Qt.Key_R) {
+                key = Qt.Key_R;
             }
         }
         Keys.onReleased: (event) => {
@@ -142,46 +143,46 @@ Window {
             Observer {
                 id: observer
             }
-            // View3D {
-            //     id: viewport1
-            //     anchors.fill: parent
-            //     renderMode: View3D.Offscreen
-            //     Node {
-            //         id: ceilingNode1
-            //         PerspectiveCamera {
-            //             id: ceilingCamera1
-            //             clipFar: 20000
-            //             clipNear: 1
-            //             fieldOfView: 60
-            //             position: Qt.vector3d(-3000, 6000, 0)
-            //             eulerRotation: Qt.vector3d(-90, -90, 0)
-            //         }
-            //     }
-            //     EmptyObjects {
-            //         id: emptyObjects1
-            //         property var emptyNum: 1
-            //     }
-            // }
-            // View3D {
-            //     id: viewport2
-            //     anchors.fill: parent
-            //     renderMode: View3D.Offscreen
-            //     Node {
-            //         id: ceilingNode2
-            //         PerspectiveCamera {
-            //             id: ceilingCamera2
-            //             clipFar: 20000
-            //             clipNear: 1
-            //             fieldOfView: 60
-            //             position: Qt.vector3d(3000, 6000, 0)
-            //             eulerRotation: Qt.vector3d(-90, 90, 0)
-            //         }
-            //     }
-            //     EmptyObjects {
-            //         id: emptyObjects2
-            //         property var emptyNum: 2
-            //     }
-            // }
+            View3D {
+                id: viewport1
+                anchors.fill: parent
+                renderMode: View3D.Offscreen
+                Node {
+                    id: ceilingNode1
+                    PerspectiveCamera {
+                        id: ceilingCamera1
+                        clipFar: 20000
+                        clipNear: 1
+                        fieldOfView: 60
+                        position: Qt.vector3d(-3000, 6000, 0)
+                        eulerRotation: Qt.vector3d(-90, -90, 0)
+                    }
+                }
+                EmptyObjects {
+                    id: emptyObjects1
+                    property var emptyNum: 1
+                }
+            }
+            View3D {
+                id: viewport2
+                anchors.fill: parent
+                renderMode: View3D.Offscreen
+                Node {
+                    id: ceilingNode2
+                    PerspectiveCamera {
+                        id: ceilingCamera2
+                        clipFar: 20000
+                        clipNear: 1
+                        fieldOfView: 60
+                        position: Qt.vector3d(3000, 6000, 0)
+                        eulerRotation: Qt.vector3d(-90, 90, 0)
+                    }
+                }
+                EmptyObjects {
+                    id: emptyObjects2
+                    property var emptyNum: 2
+                }
+            }
             View3D {
                 id: viewport
                 anchors.fill: parent
@@ -345,7 +346,7 @@ Window {
                     property bool isDraggingWindow: false
                     property bool selectView: false
                     property bool selectBot: false
-                    // hoverEnabled: true
+                    hoverEnabled: true
 
                     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
@@ -420,26 +421,24 @@ Window {
                         lastPos = Qt.point(event.x, event.y);
                     }
 
-                    onWheel: (wheel) => {
-                        let rz = wheel.angleDelta.y * dt * linearSpeed
-                        let rx = -wheel.angleDelta.x * dt * linearSpeed
+onWheel: (wheel) => {
+    let rz = wheel.angleDelta.y * dt * linearSpeed
+    let rx = -wheel.angleDelta.x * dt * linearSpeed
 
-                        let forward = overviewCamera.forward
-                        let right = overviewCamera.right
-                        let distance = overviewCamera.position.length()
+    let forward = overviewCamera.forward
+    let right = overviewCamera.right
 
-                        if (rz > 0 && distance < zoomLimit) return
-
-                        overviewCamera.position.x += rx * right.x + rz * forward.x
-                        overviewCamera.position.z += rx * right.z + rz * forward.z
-                    }
+    // Y成分も含めて移動
+    overviewCamera.position.x += rx * right.x + rz * forward.x
+    overviewCamera.position.y += rz * forward.y   // ← これを追加
+    overviewCamera.position.z += rx * right.z + rz * forward.z
+}
                     Setting {
                         id: setting
                         property var windowWidth : window.width
                         property var windowHeight : window.height
                         property var visionMulticastPort: observer.visionMulticastPort
                     }
-
                 }
                 Node {
                     id: node
@@ -474,7 +473,6 @@ Window {
         function onUpdateSimulationSignal() {
             runTime = (Date.now() - lastTime);
 
-            
             if (observer.hideBallMode) {
                 isFoundBall = false;
                 emptyObjects1.syncEmptyObjects(runTime);

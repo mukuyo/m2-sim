@@ -356,11 +356,6 @@ Node {
                 }
                 color.holds[i] = false;
             }
-            // if (isYellow == true && i == 0) {
-            //     // ball.position = Qt.vector3d(frame.position.x + (95 * Math.cos(-color.poses[i].w)), 25, (frame.position.z + (95 * Math.sin(-color.poses[i].w))));
-            //     // ballRoot.position = Qt.vector3d(frame.position.x + (95 * Math.cos(-color.poses[i].w)), 25, (frame.position.z + (95 * Math.sin(-color.poses[i].w))));
-            //     control.dribble(frame, isYellow, i, botRadianBall, botDistanceBall, color);
-            // }
         }
     }
 
@@ -376,7 +371,7 @@ Node {
         botMovement(blue, timestep);
         botMovement(yellow, timestep, true);
 
-        ball2DPosition = Qt.vector2d(ball.position.x, ball.position.z);
+        ball2DPosition = Qt.vector2d(ballPosition.x, ballPosition.z);
         if (teleopVelocity.x != 0 || teleopVelocity.y != 0 || teleopVelocity.z != 0){
             ball.setLinearVelocity(Qt.vector3d(teleopVelocity.x, teleopVelocity.y, teleopVelocity.z));
             let ballFriction = 0.99;
@@ -423,14 +418,13 @@ Node {
             teleopVelocity = Qt.vector4d(0, 0, 0, 0);
             ballVelocity = Qt.vector4d(0, 0, 0, 0);
             ball.reset(result.scenePosition, Qt.vector3d(0, 0, 0));
-            dribbleInfo.id = -1;
+            ballPosition = Qt.vector4d(ball.position.x, ball.position.y, ball.position.z, 0);
             for (let i = 0; i < blue.num; i++) {
                 bBotsFrame.children[i].collisionShapes[5].position = Qt.vector3d(0, 5000, 0);
             }
             for (let i = 0; i < yellow.num; i++) {
                 yBotsFrame.children[i].collisionShapes[5].position = Qt.vector3d(0, 5000, 0);
             }
-            dribbleInfo.id = -1;
         } else if (target == "bot") {
             if (selectedRobotColor == "blue") {
                 bBotsFrame.children[botCursorID].reset(result.scenePosition, Qt.vector3d(0, -90, 0));
@@ -494,7 +488,6 @@ Node {
         }
         ballMarker.children[0].materials[0].diffuseColor= "#EB392A";
         ballMarker.children[0].materials[0].opacity = 0.4;
-        tempBallModel.children[0].materials[0].diffuseColor= "blue";
     }
     QtObject {
         id: dribbleInfo
