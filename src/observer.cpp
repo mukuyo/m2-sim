@@ -18,7 +18,7 @@ Observer::Observer(QObject *parent) : QObject(parent), config("../config/config_
     rollingFriction = config.value("Physics/RollingFriction", 0.04).toFloat();
     kickerFriction = config.value("Physics/KickerFriction", 0.8).toFloat();
     gravity = config.value("Physics/Gravity", 9.81).toFloat();
-    desiredFps = config.value("Physics/DesiredFps", 60).toInt();
+    desiredFps = 60;
     ccdMode = config.value("Physics/CCD", true).toBool();
     hideBallMode = config.value("Camera/HideBallMode", false).toBool();
 
@@ -53,7 +53,7 @@ Observer::Observer(QObject *parent) : QObject(parent), config("../config/config_
     simTimer = new QTimer(this);
     simTimer->setTimerType(Qt::PreciseTimer);
     connect(simTimer, &QTimer::timeout, this, &Observer::updateSimulator);
-    simTimer->start(17);
+    simTimer->start(1000 / 60);
 }
 
 void Observer::visionReceive(const mocSim_Packet& packet) {
@@ -185,8 +185,9 @@ void Observer::setGravity(float gravity) {
     emit settingChanged();
 }
 void Observer::setDesiredFps(int fps) {
-    desiredFps = fps;
-    config.setValue("Physics/DesiredFps", fps);
+    Q_UNUSED(fps);
+    desiredFps = 60;
+    config.setValue("Physics/DesiredFps", desiredFps);
     emit settingChanged();
 }
 void Observer::setCcdMode(bool mode) {
