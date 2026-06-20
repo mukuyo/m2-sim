@@ -33,6 +33,8 @@ Node {
     property var ballVelocity: Qt.vector4d(0, 0, 0, 0)
     property var ballModelNum: 1
     property var ballReset: false
+    property int skipRollingFrictionFrames: 0
+    property real rollingFrictionImpulseScale: 3000.0
     property var ballPositions: new Array(ballModelNum).fill(Qt.vector4d(0, 0, 0, 0))
     MotionControl {
         id: motionControl
@@ -68,6 +70,9 @@ Node {
         model: blue.num
         DynamicRigidBody {
             objectName: "b" + String(index)
+            massMode: DynamicRigidBody.MassAndInertiaTensor
+            mass: 2.5
+            inertiaTensor: Qt.vector3d(5000, 5000, 5000)
             linearAxisLock: DynamicRigidBody.LockY
             sendContactReports: true
             position: Qt.vector4d(blue.poses[index].x, 0, blue.poses[index].z, blue.poses[index].w)
@@ -172,6 +177,9 @@ Node {
         model: yellow.num
         DynamicRigidBody {
             objectName: "y" + String(index)
+            massMode: DynamicRigidBody.MassAndInertiaTensor
+            mass: 2.5
+            inertiaTensor: Qt.vector3d(5000, 5000, 5000)
             linearAxisLock: DynamicRigidBody.LockY
             sendContactReports: true
             position: Qt.vector4d(yellow.poses[index].x, 0, yellow.poses[index].z, yellow.poses[index].w)
@@ -363,7 +371,14 @@ Node {
     {
         ballVelocity = mu.calcVelocity(ballPosition, preBallPosition, timestep);
         ballAngularVelocity = mu.calcVelocity(ball.eulerRotation, preBallAngularPosition, timestep);
-        applyRollingFriction(ball, ballVelocity, ballAngularVelocity, timestep);
+        let teleopSpeed = Math.sqrt(teleopVelocity.x * teleopVelocity.x
+                                    + teleopVelocity.y * teleopVelocity.y
+                                    + teleopVelocity.z * teleopVelocity.z);
+        let teleopActive = teleopSpeed > 1.0;
+        if (skipRollingFrictionFrames > 0)
+            skipRollingFrictionFrames--;
+        // if (!teleopActive && skipRollingFrictionFrames == 0)
+            // applyRollingFriction(ball, ballVelocity, ballAngularVelocity, timestep);
         preBallPosition = ballPosition;
         preBallAngularPosition = ball.eulerRotation;
         ballReset = true;
@@ -372,27 +387,32 @@ Node {
         botMovement(yellow, timestep, true);
 
         ball2DPosition = Qt.vector2d(ballPosition.x, ballPosition.z);
-        if (teleopVelocity.x != 0 || teleopVelocity.y != 0 || teleopVelocity.z != 0){
+        if (teleopActive){
             ball.setLinearVelocity(Qt.vector3d(teleopVelocity.x, teleopVelocity.y, teleopVelocity.z));
             let ballFriction = 0.99;
             teleopVelocity = Qt.vector3d(teleopVelocity.x * ballFriction, teleopVelocity.y * ballFriction, teleopVelocity.z * ballFriction);
+        } else {
+            teleopVelocity = Qt.vector3d(0, 0, 0);
         }
     }
 
-    function applyRollingFriction()
+    function applyRollingFriction(ballBody, linearVelocity, angularVelocity, timestep)
     {
-        // let v = ballVelocity
-        // let speed = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
-        // if (speed < 0.001 || speed > 10 || ballPosition.y > 30) {
+        // if (observer.rollingFriction <= 0 || timestep <= 0 || ballBody.position.x > 50000) {
         //     return;
         // }
-        // let nx = -v.x / speed
-        // let ny = -v.y / speed
-        // let nz = -v.z / speed
-        // let muu = observer.rollingFriction * 1000.0
-        // let f = muu
-        // console.log(nx*f, ny*f, nz*f)
-        // ball.applyCentralImpulse(Qt.vector3d(nx * f, ny * f, nz * f))
+
+        let vx = linearVelocity.x;
+        let vz = linearVelocity.z;
+        let speed = Math.sqrt(vx * vx + vz * vz);
+        // if (speed < 1.0 || ballPosition.y > 30) {
+        //     return;
+        // }
+
+        let dt = timestep > 1.0 ? timestep / 1000.0 : timestep;
+        let impulse = Math.min(speed, observer.rollingFriction * rollingFrictionImpulseScale * dt);
+        ballBody.applyCentralImpulse(Qt.vector3d(-vx / speed * impulse, 0, -vz / speed * impulse));
+        console.log("Rolling friction applied: " + impulse + " at speed: " + speed);
     }
 
     function syncGameObjects() {
@@ -419,6 +439,8 @@ Node {
             ballVelocity = Qt.vector4d(0, 0, 0, 0);
             ball.reset(result.scenePosition, Qt.vector3d(0, 0, 0));
             ballPosition = Qt.vector4d(ball.position.x, ball.position.y, ball.position.z, 0);
+            preBallPosition = ballPosition;
+            skipRollingFrictionFrames = 30;
             for (let i = 0; i < blue.num; i++) {
                 bBotsFrame.children[i].collisionShapes[5].position = Qt.vector3d(0, 5000, 0);
             }
@@ -534,4 +556,3 @@ Node {
         }
     }
 }
-

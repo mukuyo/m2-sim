@@ -28,8 +28,9 @@ Window {
     property var yBotPixelBalls: new Array(16).fill(Qt.vector2d(-1, -1))
     property var ball2DPosition: Qt.vector2d(0, 0)
     property var cursorPosition: Qt.point(0, 0)
-    property real runTime: 16.667
-    property real showRunTime: 16.667
+    property real fixedFrameTime: 1000.0 / 60.0
+    property real runTime: fixedFrameTime
+    property real showRunTime: fixedFrameTime
     property var selectedCamera: "Overview Camera"
     property real lastTime: 0
     property int key: 0
@@ -44,8 +45,8 @@ Window {
         PhysicsWorld {
             id: physicsWorld
             scene: viewport.scene
-            // maximumTimestep: 1000.0 / observer.desiredFps
-            // minimumTimestep: 1000.0 / observer.desiredFps
+            maximumTimestep: fixedFrameTime
+            minimumTimestep: fixedFrameTime
             enableCCD: observer.ccdMode
             gravity: Qt.vector3d(0, -observer.gravity*1000.0, 0)
             typicalLength: 100
@@ -53,12 +54,12 @@ Window {
             numThreads: observer.numThreads
             forceDebugDraw: observer.forceDebugDrawMode
             onFrameDone: (timestep) => {
-                game_objects.updateGameObjects(runTime);
-                game_objects.syncGameObjects(runTime);
+                game_objects.updateGameObjects(fixedFrameTime);
+                game_objects.syncGameObjects(fixedFrameTime);
             }
         }
         Timer {
-            interval: 1000.0 / (observer.desiredFps / 2)
+            interval: fixedFrameTime * 2
             running: true
             repeat: true
             onTriggered: {
@@ -350,17 +351,35 @@ Window {
 
                     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
+                    function hasRobotHit(results) {
+                        for (let i = 0; i < results.length; i++) {
+                            let name = results[i].objectHit.objectName;
+                            if (name.startsWith("b") || name.startsWith("y")) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+
                     onPressed: (event) => {
                         lastPos = Qt.point(event.x, event.y)
                         clickPos = Qt.point(event.x, event.y);
                         isDraggingWindow = (event.y < 35);
                         if (event.button === Qt.LeftButton && key === Qt.Key_R) {
                             game_objects.resetPosition("bot", viewport.pick(event.x, event.y));
+                        } else if (event.button === Qt.LeftButton) {
+                            selectBot = hasRobotHit(viewport.pickAll(event.x, event.y));
+                            selectView = false;
                         } else if (event.button === Qt.RightButton) {
                             game_objects.resetPosition("ball", viewport.pick(event.x, event.y));
                         }
                     }
                     onReleased: (event) => {
+                        selectBot = false;
+                        selectView = false;
+                        isDraggingWindow = false;
+                    }
+                    onCanceled: {
                         selectBot = false;
                         selectView = false;
                         isDraggingWindow = false;
@@ -379,15 +398,13 @@ Window {
                         let results = viewport.pickAll(event.x, event.y);
 
                         for (let i = 0; i < results.length; i++) {
-                            if (results[i].objectHit.objectName.startsWith("b") || results[i].objectHit.objectName.startsWith("y")) {
-                                selectBot = true;
-                            }
                             if (results[i].objectHit.objectName === "field") {
                                 cursorText.text = "(" + parseInt(results[i].scenePosition.x) + "," + parseInt(-results[i].scenePosition.z) + ")";
                             }
                         }
-                        if (selectBot && !selectView) {
+                        if (selectBot && (mouseArea.pressedButtons & Qt.LeftButton)) {
                             game_objects.resetBotPosition(results);
+                            lastPos = Qt.point(event.x, event.y);
                             return;
                         } else {
                             selectView = true;
@@ -471,14 +488,13 @@ onWheel: (wheel) => {
             window.height = observer.windowHeight   
         }
         function onUpdateSimulationSignal() {
-            runTime = (Date.now() - lastTime);
+            runTime = fixedFrameTime;
 
             if (observer.hideBallMode) {
                 isFoundBall = false;
                 emptyObjects1.syncEmptyObjects(runTime);
                 emptyObjects2.syncEmptyObjects(runTime);
             }
-            lastTime = Date.now();
             showRunTime = runTime;
         }
     }
