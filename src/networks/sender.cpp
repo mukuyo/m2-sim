@@ -2,6 +2,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <cmath>
 
 Sender::Sender(const string address, quint16 port, QObject *parent) :
     ioContext_(),
@@ -65,7 +66,9 @@ void Sender::send(int camera_num, QVector3D ball_position, QList<QVector3D> blue
 }
 
 void Sender::setDetectionInfo(SSL_DetectionFrame &detection, int camera_id, QVector3D ball_position, QList<QVector3D> blue_positions, QList<QVector3D> yellow_positions) {
-    // if ((ball_position.x() >= 0 && camera_id == 0) || (ball_position.x() < 0 && camera_id == 1)) {
+    // Do not emit a ball detection with off-field/garbage coordinates
+    // (e.g. the dribble "park" sentinel at ~100000). Mirrors ssl-Raven's CamFilter guard.
+    if (std::abs(ball_position.x()) < 20000.0f && std::abs(ball_position.z()) < 20000.0f) {
         SSL_DetectionBall* ball = detection.add_balls();
         ball->set_confidence(1.0);
         ball->set_x(ball_position.x());
@@ -73,7 +76,7 @@ void Sender::setDetectionInfo(SSL_DetectionFrame &detection, int camera_id, QVec
         ball->set_z(ball_position.y());
         ball->set_pixel_x(0);
         ball->set_pixel_y(0);
-    // }
+    }
     
     for (int i = 0; i < blue_positions.size(); ++i) {
         // if ((blue_positions[i].x() > 0 && camera_id == 0) || (blue_positions[i].x() < 0 && camera_id == 1)) {

@@ -377,8 +377,10 @@ Node {
         let teleopActive = teleopSpeed > 1.0;
         if (skipRollingFrictionFrames > 0)
             skipRollingFrictionFrames--;
-        // if (!teleopActive && skipRollingFrictionFrames == 0)
-            // applyRollingFriction(ball, ballVelocity, ballAngularVelocity, timestep);
+        // Decelerate the rolling ball so a kick doesn't roll forever off the field
+        // (and escape past the boundary walls into huge vision coordinates).
+        if (!teleopActive && skipRollingFrictionFrames == 0)
+            applyRollingFriction(ball, ballVelocity, ballAngularVelocity, timestep);
         preBallPosition = ballPosition;
         preBallAngularPosition = ball.eulerRotation;
         ballReset = true;
@@ -398,21 +400,24 @@ Node {
 
     function applyRollingFriction(ballBody, linearVelocity, angularVelocity, timestep)
     {
-        // if (observer.rollingFriction <= 0 || timestep <= 0 || ballBody.position.x > 50000) {
-        //     return;
-        // }
+        // Skip when friction is disabled, or while the ball is parked off-field during
+        // dribbling (x ~ 100000): never nudge the park sentinel.
+        if (observer.rollingFriction <= 0 || timestep <= 0 || ballBody.position.x > 50000) {
+            return;
+        }
 
         let vx = linearVelocity.x;
         let vz = linearVelocity.z;
         let speed = Math.sqrt(vx * vx + vz * vz);
-        // if (speed < 1.0 || ballPosition.y > 30) {
-        //     return;
-        // }
+        // Skip when nearly stopped (avoids divide-by-zero below) or airborne (a chip
+        // shouldn't get rolling friction until it lands).
+        if (speed < 1.0 || ballPosition.y > 30) {
+            return;
+        }
 
         let dt = timestep > 1.0 ? timestep / 1000.0 : timestep;
         let impulse = Math.min(speed, observer.rollingFriction * rollingFrictionImpulseScale * dt);
         ballBody.applyCentralImpulse(Qt.vector3d(-vx / speed * impulse, 0, -vz / speed * impulse));
-        console.log("Rolling friction applied: " + impulse + " at speed: " + speed);
     }
 
     function syncGameObjects() {
