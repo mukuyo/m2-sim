@@ -30,7 +30,16 @@ QtObject {
     function updateBall() {
         if (dribbleInfo.id == -1) {
             // ballModels.children[0].position = Qt.vector3d(ball.position.x, ball.position.y, ball.position.z);
-            ballPosition = Qt.vector4d(ball.position.x, ball.position.y, ball.position.z, 0);
+            // After a kick/release, Control.kick() (and the spinner-off release in
+            // GameObjects) queue ball.reset(mouth), which Qt Quick 3D Physics applies on
+            // the NEXT step. For that one step ball.position is still the off-field park
+            // sentinel (~100000) set by Control.dribble(). Publishing it makes Raven
+            // reject the ball ("abnormal coordinates") and it vanishes. Only publish an
+            // on-field position; otherwise hold the last good ballPosition until physics
+            // catches up (one frame later the ball appears at the mouth, flying).
+            if (Math.abs(ball.position.x) < 50000 && Math.abs(ball.position.z) < 50000) {
+                ballPosition = Qt.vector4d(ball.position.x, ball.position.y, ball.position.z, 0);
+            }
             tempBallModel.visible = false;
             // ballModels.children[0].children[0].materials[0].diffuseColor= "orange";
         } else {
