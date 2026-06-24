@@ -14,11 +14,15 @@ QtObject {
         kickTimer.running = true;
         color.kickspeeds[i].x *= observer.kickerFriction;
         color.kickspeeds[i].y *= observer.kickerFriction;
-        ball.setLinearVelocity(Qt.vector3d(
+        // Defer the launch: store the velocity and let updateGameObjects() apply it only
+        // after the ball.reset() above has actually moved the ball back to the mouth
+        // (next physics step). Applying it now would launch the ball from the off-field
+        // park position (x~100000) and send it flying into the void.
+        pendingKickVelocity = Qt.vector3d(
             color.kickspeeds[i].x * Math.cos(radian),
             color.kickspeeds[i].y,
             -color.kickspeeds[i].x * Math.sin(radian)
-        ));
+        );
     }
 
     function dribble(frame, isYellow, i, botRadianBall, botDistanceBall, color) {

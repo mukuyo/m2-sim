@@ -27,6 +27,7 @@ Node {
     property var selectedRobotColor: "blue"
     property real botCursorID: 0
     property var kickFlag: false
+    property var pendingKickVelocity: null
     property var preBallPosition: Qt.vector4d(0, 0, 0, 0)
     property var ballAngularVelocity: Qt.vector4d(0, 0, 0, 0)
     property var preBallAngularPosition: Qt.vector4d(0, 0, 0, 0)
@@ -375,6 +376,17 @@ Node {
                                     + teleopVelocity.y * teleopVelocity.y
                                     + teleopVelocity.z * teleopVelocity.z);
         let teleopActive = teleopSpeed > 1.0;
+        // Apply a deferred kick only once the ball has actually returned to the mouth.
+        // kick() teleports the parked ball (x~100000) back to the dribbler via the
+        // deferred ball.reset(), then stores the launch velocity here. Waiting until the
+        // ball is back on-field prevents it from being launched from the off-field park
+        // position and flying off into the void on the kick frame.
+        if (pendingKickVelocity !== null
+                && Math.abs(ball.position.x) < 50000
+                && Math.abs(ball.position.z) < 50000) {
+            ball.setLinearVelocity(pendingKickVelocity);
+            pendingKickVelocity = null;
+        }
         if (skipRollingFrictionFrames > 0)
             skipRollingFrictionFrames--;
         // Decelerate the rolling ball so a kick doesn't roll forever off the field
@@ -442,6 +454,7 @@ Node {
         if (target == "ball") {
             teleopVelocity = Qt.vector4d(0, 0, 0, 0);
             ballVelocity = Qt.vector4d(0, 0, 0, 0);
+            pendingKickVelocity = null;
             ball.reset(result.scenePosition, Qt.vector3d(0, 0, 0));
             ballPosition = Qt.vector4d(ball.position.x, ball.position.y, ball.position.z, 0);
             preBallPosition = ballPosition;
