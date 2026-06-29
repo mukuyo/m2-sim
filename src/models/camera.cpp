@@ -49,10 +49,10 @@ QVector2D Camera::getBallPosition(QVector3D objectPos, QVector3D cameraPos, QVec
         }
     }
 
-    // if (count == 0) {
+    if (count == 0) {
         // qDebug() << "Ball is not visible";
         return QVector2D(-1, -1); // 完全に視野外
-    // }
+    }
 
     QVector2D avgScreenPos = screenSum / count;
     // qDebug() << "Ball projected center (visible part):" << avgScreenPos;

@@ -44,6 +44,11 @@ class Observer : public QObject {
     Q_PROPERTY(bool ccdMode READ getCcdMode WRITE setCcdMode NOTIFY settingChanged)
     Q_PROPERTY(int numThreads READ getNumThreads WRITE setNumThreads NOTIFY settingChanged)
     Q_PROPERTY(bool hideBallMode READ getHideBallMode WRITE setHideBallMode NOTIFY settingChanged)
+    // Onboard (RACOON-Pi) camera frame size used when projecting the ball into
+    // each robot's camera. QML reads these so the pixel scale matches the
+    // center-origin conversion done for PiToMw.
+    Q_PROPERTY(int onboardCameraWidth READ getOnboardCameraWidth CONSTANT)
+    Q_PROPERTY(int onboardCameraHeight READ getOnboardCameraHeight CONSTANT)
 
 public:
     static constexpr int MaxRobots = 16;
@@ -104,7 +109,9 @@ public:
     bool getCcdMode() const { return ccdMode; }
     int getNumThreads() const { return numThreads; }
     bool getHideBallMode() const { return hideBallMode; }
-    
+    int getOnboardCameraWidth() const { return onboardCameraWidth; }
+    int getOnboardCameraHeight() const { return onboardCameraHeight; }
+
     void setWindowWidth(int width);
     void setWindowHeight(int height);
     void setVisionMulticastAddress(const QString &address);
@@ -185,6 +192,8 @@ private:
     int desiredFps;
     bool ccdMode;
     bool hideBallMode;
+    int onboardCameraWidth = 640;
+    int onboardCameraHeight = 480;
 
     QList<QVector3D> bluePositions;
     QList<QVector3D> yellowPositions;
@@ -196,7 +205,14 @@ private:
     // Derives each robot's body twist from the physics-reported pose (the same
     // pose RAVEN sees on vision), maps it to wheel speeds via inverse omni
     // kinematics, injects configurable sensor noise, and emits PiToMw.
-    void emitEncoderFeedback(const QList<QVector3D> &positions, float dtSec);
+    // Also carries the per-robot onboard-camera ball detection and dribbler/
+    // photo sensor state so the PiToMw RAVEN receives matches what RACOON-Pi
+    // would report (camera coords + sensors), not just wheel speeds.
+    void emitEncoderFeedback(const QList<QVector3D> &positions,
+                             const QList<bool> &ballCameraExists,
+                             const QList<QVector2D> &ballCameraPixels,
+                             const QList<bool> &ballContacts,
+                             float dtSec);
 
     FeedbackSender *feedbackSender = nullptr;
     QElapsedTimer actuationClock;   // dt for the actuation delay model

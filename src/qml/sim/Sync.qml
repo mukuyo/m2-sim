@@ -89,15 +89,31 @@ QtObject {
         botBar.children[i].width = Math.sqrt(Math.pow(color.velNormals[i], 2) + Math.pow(color.velTangents[i], 2)) * 0.008;
     }
     function updateCamera(color, frame, i, isYellow) {
-        // let cameraPosition = Qt.vector3d(-70*Math.sin(color.poses[i].w)+frame.position.x, color.cameras[i].position.y + frame.position.y, -70*Math.cos(color.poses[i].w)+frame.position.z);
-        // let tempBallPixel = camera.getBallPosition(ball.position, cameraPosition, color.cameras[i].forward, color.cameras[i].up, 640, 480, 60);
-
-        // if (tempBallPixel.x !=-1 && tempBallPixel.y != -1) {
-        //     botPixelBalls[i] = tempBallPixel;
-        //     botCameraExists[i] = true;
-        // } else {
-        //     color.cameraExists[i] = false;
-        // }
+        // Project the ball onto the robot's onboard camera (RACOON-Pi camera),
+        // reproducing the per-robot ball detection that RACOON-Pi reports to
+        // RAVEN via PiToMw. The onboard PerspectiveCamera is a child of the
+        // robot frame, so its scenePosition/forward/up already follow the robot
+        // pose in world space — no manual trigonometry needed.
+        let botPixelBalls = isYellow ? window.yBotPixelBalls : window.bBotPixelBalls;
+        let cam = color.cameras[i];
+        if (cam === undefined) {
+            color.cameraExists[i] = false;
+            botPixelBalls[i] = Qt.vector2d(-1, -1);
+        } else {
+            // The ball pixel must be measured in the onboard camera's own frame
+            // (default 640x480), independent of the GUI window size.
+            let tempBallPixel = camera.getBallPosition(
+                ball.position, cam.scenePosition, cam.forward, cam.up,
+                observer.onboardCameraWidth, observer.onboardCameraHeight, cam.fieldOfView
+            );
+            if (tempBallPixel.x !== -1 && tempBallPixel.y !== -1) {
+                botPixelBalls[i] = tempBallPixel;
+                color.cameraExists[i] = true;
+            } else {
+                botPixelBalls[i] = Qt.vector2d(-1, -1);
+                color.cameraExists[i] = false;
+            }
+        }
         color.position2Ds[i] = Qt.vector2d(frame.position.x, frame.position.z);
     }
 

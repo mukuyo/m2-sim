@@ -21,6 +21,8 @@ Observer::Observer(QObject *parent) : QObject(parent), config("../config/config_
     desiredFps = 60;
     ccdMode = config.value("Physics/CCD", true).toBool();
     hideBallMode = config.value("Camera/HideBallMode", false).toBool();
+    onboardCameraWidth = config.value("Camera/OnboardFrameWidth", 640).toInt();
+    onboardCameraHeight = config.value("Camera/OnboardFrameHeight", 480).toInt();
 
     sender = new Sender(visionMulticastAddress.toStdString(), visionMulticastPort, this);
     visionReceiver = new VisionReceiver(this);
@@ -251,10 +253,15 @@ void Observer::updateObjects(
     bluePositions = blue_positions.mid(0, blueRobotCount);
     yellowPositions = yellow_positions.mid(0, yellowRobotCount);
 
-    // Synthesize wheel-encoder feedback for the team RAVEN controls.
+    // Synthesize RACOON-Pi feedback (wheel encoders + onboard camera + sensors)
+    // for the team RAVEN controls.
     float fbDt = feedbackClock.nsecsElapsed() * 1e-9f;
     feedbackClock.restart();
-    emitEncoderFeedback(encoderTeamYellow ? yellowPositions : bluePositions, fbDt);
+    emitEncoderFeedback(encoderTeamYellow ? yellowPositions : bluePositions,
+                        encoderTeamYellow ? yellowBallCameraExists : blueBallCameraExists,
+                        encoderTeamYellow ? yellowBallPixels : blueBallPixels,
+                        encoderTeamYellow ? yBotBallContacts : bBotBallContacts,
+                        fbDt);
 
     if (isFoundBall)
         this->ballPosition = ball_position;
@@ -275,7 +282,11 @@ void Observer::updateSimulator() {
     sender->send(1, ballPosition, bluePositions, yellowPositions);
 }
 
-void Observer::emitEncoderFeedback(const QList<QVector3D> &positions, float dtSec) {
+void Observer::emitEncoderFeedback(const QList<QVector3D> &positions,
+                                   const QList<bool> &ballCameraExists,
+                                   const QList<QVector2D> &ballCameraPixels,
+                                   const QList<bool> &ballContacts,
+                                   float dtSec) {
     if (!encoderEnabled || feedbackSender == nullptr) {
         return;
     }
@@ -284,6 +295,10 @@ void Observer::emitEncoderFeedback(const QList<QVector3D> &positions, float dtSe
         prevEncoderPositions = positions;  // (re)seed; need two frames to differentiate
         return;
     }
+    // Onboard-camera frame center: pixels from QML are top-left origin; RACOON-Pi
+    // reports center-origin, x right / y up (camera/transport/encoder.py).
+    const float halfW = onboardCameraWidth * 0.5f;
+    const float halfH = onboardCameraHeight * 0.5f;
     std::normal_distribution<double> gauss(0.0, encoderNoiseSigmaMps > 0.0 ? encoderNoiseSigmaMps : 1.0);
     for (int i = 0; i < n; ++i) {
         // positions[i] = (X = frame.x [mm], Y = -frame.z [mm], heading [deg]) —
@@ -314,7 +329,30 @@ void Observer::emitEncoderFeedback(const QList<QVector3D> &positions, float dtSe
             }
             wheelMps[k] = static_cast<float>(vMps);
         }
-        feedbackSender->sendRobotFeedback(i, wheelMps[0], wheelMps[1], wheelMps[2], wheelMps[3]);
+
+        FeedbackSender::RobotFeedback fb;
+        fb.flMps = wheelMps[0];
+        fb.blMps = wheelMps[1];
+        fb.brMps = wheelMps[2];
+        fb.frMps = wheelMps[3];
+
+        // Onboard-camera ball detection (RACOON-Pi Ball_Status).
+        const bool ballSeen = i < ballCameraExists.size() && ballCameraExists[i];
+        fb.ballExists = ballSeen;
+        if (ballSeen && i < ballCameraPixels.size()) {
+            const QVector2D &px = ballCameraPixels[i];  // top-left pixel origin
+            fb.ballCamX = px.x() - halfW;               // +x right
+            fb.ballCamY = halfH - px.y();               // +y up
+        }
+
+        // Kicker photo / dribbler sensors. The sim exposes a single "ball at the
+        // mouth" contact (holds[i]); RACOON-Pi has both an IR kicker sensor and a
+        // dribbler sensor that are effectively co-asserted when the ball is held.
+        const bool ballHeld = i < ballContacts.size() && ballContacts[i];
+        fb.photoSensor = ballHeld;
+        fb.dribblerSensor = ballHeld;
+
+        feedbackSender->sendRobotFeedback(i, fb);
     }
     prevEncoderPositions = positions;
 }

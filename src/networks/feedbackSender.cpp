@@ -27,25 +27,30 @@ FeedbackSender::~FeedbackSender() {
     socket_.close(ec);
 }
 
-void FeedbackSender::sendRobotFeedback(int robotId, float flMps, float blMps,
-                                       float brMps, float frMps) {
+void FeedbackSender::sendRobotFeedback(int robotId, const RobotFeedback &fb) {
     PiToMw msg;
     Robot_Status *rs = msg.mutable_robots_status();
     rs->set_robot_id(robotId);
-    rs->set_is_detect_photo_sensor(false);
-    rs->set_is_detect_dribbler_sensor(false);
+    rs->set_is_detect_photo_sensor(fb.photoSensor);
+    rs->set_is_detect_dribbler_sensor(fb.dribblerSensor);
     rs->set_is_new_dribbler(false);
-    rs->set_battery_voltage(160);  // 16.0 V, firmware sends ×10
-    rs->set_cap_power(0);
-    rs->set_fl_wheel_speed(flMps);
-    rs->set_bl_wheel_speed(blMps);
-    rs->set_br_wheel_speed(brMps);
-    rs->set_fr_wheel_speed(frMps);
+    rs->set_battery_voltage(fb.batteryDecivolts);  // firmware sends voltage ×10
+    rs->set_cap_power(fb.capPower);
+    rs->set_fl_wheel_speed(fb.flMps);
+    rs->set_bl_wheel_speed(fb.blMps);
+    rs->set_br_wheel_speed(fb.brMps);
+    rs->set_fr_wheel_speed(fb.frMps);
 
     Ball_Status *bs = msg.mutable_ball_status();
-    bs->set_is_ball_exit(false);
-    bs->set_ball_camera_x(0.0f);
-    bs->set_ball_camera_y(0.0f);
+    // is_ball_exit is a mistranslation of "exist": true == ball is in view.
+    bs->set_is_ball_exit(fb.ballExists);
+    if (fb.ballExists) {
+        bs->set_ball_camera_x(fb.ballCamX);
+        bs->set_ball_camera_y(fb.ballCamY);
+    } else {
+        bs->set_ball_camera_x(kBallCoordMissing);
+        bs->set_ball_camera_y(kBallCoordMissing);
+    }
 
     Ball *ball = msg.mutable_ball();
     ball->set_min_threshold("");
@@ -53,7 +58,7 @@ void FeedbackSender::sendRobotFeedback(int robotId, float flMps, float blMps,
     ball->set_ball_detect_radius(0);
     ball->set_circularity_threshold(0.0f);
 
-    msg.set_is_new_robot(true);
+    msg.set_is_new_robot(fb.isNewRobot);
 
     std::string payload;
     if (!msg.SerializeToString(&payload)) {
