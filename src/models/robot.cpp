@@ -22,9 +22,11 @@ void Robot::visionUpdate(mocSim_Robot_Command robotCommand) {
     id = robotCommand.id();
     kickspeedx = robotCommand.kickspeedx()*1000.0;
     kickspeedz = robotCommand.kickspeedz()*1000.0;
-    veltangent = robotCommand.veltangent()*1000.0;
-    velnormal = robotCommand.velnormal()*1000.0;
-    velangular = robotCommand.velangular();
+    // Velocity goes through the actuation delay model (advanceActuation), not
+    // straight to veltangent/velnormal/velangular which hold the applied value.
+    cmdTangent = robotCommand.veltangent()*1000.0;
+    cmdNormal = robotCommand.velnormal()*1000.0;
+    cmdAngular = robotCommand.velangular();
     spinner = robotCommand.spinner() ? 1.0 : 0.0;
     wheelsspeed = robotCommand.wheelsspeed();
     wheel1 = robotCommand.wheel1();
@@ -73,9 +75,9 @@ void Robot::processMoveCommand(const RobotMoveCommand &moveCommand) {
         // robot->setSpeed(3, wheelVel.front_left());
     } else if (moveCommand.has_local_velocity()) {
         auto &vel = moveCommand.local_velocity();
-        velnormal = vel.left()*1000.0;
-        veltangent = vel.forward()*1000.0;
-        velangular = vel.angular();
+        cmdNormal = vel.left()*1000.0;
+        cmdTangent = vel.forward()*1000.0;
+        cmdAngular = vel.angular();
     } else if(moveCommand.has_global_velocity()) {
         // auto &vel = moveCommand.global_velocity();
         // dReal orientation = -robot->getDir() * M_PI / 180.0;
@@ -87,6 +89,41 @@ void Robot::processMoveCommand(const RobotMoveCommand &moveCommand) {
         // pError->set_code("GRSIM_UNSUPPORTED_MOVE_COMMAND");
         // pError->set_message("Unsupported move command");
     }
+}
+
+void Robot::setActuationParams(float tauLin, float tauAng, float deadLin, float deadAng) {
+    tauLinearSec = tauLin;
+    tauAngularSec = tauAng;
+    deadTimeLinearSec = deadLin;
+    deadTimeAngularSec = deadAng;
+}
+
+// Push the command into a per-axis delay line (transport dead time), then apply
+// a first-order lag toward the delayed command. tau/dead = 0 ⇒ applied = cmd.
+float Robot::advanceAxis(float &applied, float cmd, std::deque<float> &buf,
+                         float tauSec, float deadTimeSec, float dtSec) {
+    int delaySteps = (deadTimeSec > 0.0f && dtSec > 0.0f)
+                         ? static_cast<int>(std::lround(deadTimeSec / dtSec))
+                         : 0;
+    buf.push_back(cmd);
+    while (static_cast<int>(buf.size()) > delaySteps + 1) {
+        buf.pop_front();
+    }
+    const float delayedCmd = buf.front();  // command from ~delaySteps ticks ago
+    const float alpha = (tauSec > 0.0f && dtSec > 0.0f)
+                            ? (1.0f - std::exp(-dtSec / tauSec))
+                            : 1.0f;
+    applied += alpha * (delayedCmd - applied);
+    return applied;
+}
+
+void Robot::advanceActuation(float dtSec) {
+    veltangent = advanceAxis(appliedTangent, cmdTangent, delayBufTangent,
+                             tauLinearSec, deadTimeLinearSec, dtSec);
+    velnormal = advanceAxis(appliedNormal, cmdNormal, delayBufNormal,
+                            tauLinearSec, deadTimeLinearSec, dtSec);
+    velangular = advanceAxis(appliedAngular, cmdAngular, delayBufAngular,
+                             tauAngularSec, deadTimeAngularSec, dtSec);
 }
 
 uint32_t Robot::getId() const { return id; }

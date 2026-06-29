@@ -2,6 +2,7 @@
 #define ROBOT_H
 
 #include <iostream>
+#include <deque>
 #include <QObject>
 #include <QVector3D>
 #include <QVariantList>
@@ -38,6 +39,14 @@ public:
     void visionUpdate(mocSim_Robot_Command robotCommand);
     void controlUpdate(RobotCommand robotCommand);
 
+    // Actuation delay model: shapes how the commanded body velocity reaches the
+    // simulator (transport dead time + first-order lag), so RAVEN's OC has a
+    // realistic plant to compensate. All seconds; 0 ⇒ ideal passthrough.
+    void setActuationParams(float tauLinearSec, float tauAngularSec,
+                            float deadTimeLinearSec, float deadTimeAngularSec);
+    // Advance applied velocity one tick; getVel* then return the applied value.
+    void advanceActuation(float dtSec);
+
     uint32_t getId() const;
     float getKickspeedx() const;
     float getKickspeedz() const;
@@ -69,6 +78,25 @@ private:
     float wheel3;
     float wheel4;
 
+    // --- Actuation delay model state ---
+    // Raw command targets (set by vision/control update); veltangent/velnormal/
+    // velangular hold the *applied* values that QML reads.
+    float cmdTangent = 0.0f;
+    float cmdNormal = 0.0f;
+    float cmdAngular = 0.0f;
+    float appliedTangent = 0.0f;
+    float appliedNormal = 0.0f;
+    float appliedAngular = 0.0f;
+    float tauLinearSec = 0.0f;
+    float tauAngularSec = 0.0f;
+    float deadTimeLinearSec = 0.0f;
+    float deadTimeAngularSec = 0.0f;
+    std::deque<float> delayBufTangent;
+    std::deque<float> delayBufNormal;
+    std::deque<float> delayBufAngular;
+
+    static float advanceAxis(float &applied, float cmd, std::deque<float> &buf,
+                             float tauSec, float deadTimeSec, float dtSec);
 };
 
 #endif // ROBOT_H

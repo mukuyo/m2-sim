@@ -1,0 +1,38 @@
+syntax = "proto2";
+
+option java_package = "org.rione.ssl.raven.communication.proto.pb_gen";
+option java_outer_classname = "PiToMwProto";
+
+message PiToMw {
+  required Robot_Status robots_status = 1;
+  required Ball_Status ball_status = 2;
+  required Ball ball = 3;
+  // True when running on Rock5A (new robot), false on Raspberry Pi (pi4).
+  required bool is_new_robot = 4;
+}
+
+message Robot_Status {
+  required uint32 robot_id  = 1;
+  required bool is_detect_photo_sensor = 2;
+  required bool is_detect_dribbler_sensor = 3;
+  required bool is_new_dribbler = 4;
+  required uint32 battery_voltage  = 5;
+  required uint32 cap_power  = 6;
+  optional float fl_wheel_speed = 7;
+  optional float bl_wheel_speed = 8;
+  optional float br_wheel_speed = 9;
+  optional float fr_wheel_speed = 10;
+}
+
+message Ball_Status {
+  required bool is_ball_exit = 1;
+  required float ball_camera_x = 2;
+  required float ball_camera_y = 3;
+}
+
+message Ball {
+  required string min_threshold = 1;
+  required string max_threshold = 2;
+  required int32 ball_detect_radius = 3;
+  required float circularity_threshold = 4;
+}
