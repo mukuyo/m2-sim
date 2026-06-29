@@ -50,6 +50,36 @@ Observer::Observer(QObject *parent) : QObject(parent), config("../config/config_
 
     numThreads = config.value("Display/NumThreads", -1).toInt();
 
+    // --- Synthetic wheel-encoder feedback + actuation delay model ---
+    encoderEnabled = config.value("Encoder/Enabled", true).toBool();
+    encoderTeamYellow = (config.value("Encoder/Team", "blue").toString().toLower() == "yellow");
+    wheelRadiusMm = config.value("Encoder/WheelRadiusMm", 26.0).toDouble();
+    robotRadiusMm = config.value("Encoder/RobotRadiusMm", 90.0).toDouble();
+    wheelAngleRad[0] = config.value("Encoder/WheelAngleFlDeg", 60.0).toDouble() * M_PI / 180.0;
+    wheelAngleRad[1] = config.value("Encoder/WheelAngleBlDeg", 135.0).toDouble() * M_PI / 180.0;
+    wheelAngleRad[2] = config.value("Encoder/WheelAngleBrDeg", -135.0).toDouble() * M_PI / 180.0;
+    wheelAngleRad[3] = config.value("Encoder/WheelAngleFrDeg", -60.0).toDouble() * M_PI / 180.0;
+    encoderNoiseSigmaMps = config.value("Encoder/NoiseSigmaMps", 0.0).toDouble();
+    encoderBiasMps = config.value("Encoder/BiasMps", 0.0).toDouble();
+    encoderQuantMps = config.value("Encoder/QuantizationMps", 0.0).toDouble();
+    QString feedbackAddress = config.value("Encoder/FeedbackAddress", "224.5.69.4").toString();
+    int feedbackPort = config.value("Encoder/FeedbackPort", 16941).toInt();
+    feedbackSender = new FeedbackSender(feedbackAddress.toStdString(),
+                                        static_cast<unsigned short>(feedbackPort));
+
+    actTauLinearSec = config.value("Actuation/TauLinearSec", 0.0).toFloat();
+    actTauAngularSec = config.value("Actuation/TauAngularSec", 0.0).toFloat();
+    actDeadTimeLinearSec = config.value("Actuation/DeadTimeLinearSec", 0.0).toFloat();
+    actDeadTimeAngularSec = config.value("Actuation/DeadTimeAngularSec", 0.0).toFloat();
+    for (int i = 0; i < MaxRobots; ++i) {
+        blueRobots[i]->setActuationParams(actTauLinearSec, actTauAngularSec,
+                                          actDeadTimeLinearSec, actDeadTimeAngularSec);
+        yellowRobots[i]->setActuationParams(actTauLinearSec, actTauAngularSec,
+                                            actDeadTimeLinearSec, actDeadTimeAngularSec);
+    }
+    actuationClock.start();
+    feedbackClock.start();
+
     simTimer = new QTimer(this);
     simTimer->setTimerType(Qt::PreciseTimer);
     connect(simTimer, &QTimer::timeout, this, &Observer::updateSimulator);
@@ -221,12 +251,70 @@ void Observer::updateObjects(
     bluePositions = blue_positions.mid(0, blueRobotCount);
     yellowPositions = yellow_positions.mid(0, yellowRobotCount);
 
+    // Synthesize wheel-encoder feedback for the team RAVEN controls.
+    float fbDt = feedbackClock.nsecsElapsed() * 1e-9f;
+    feedbackClock.restart();
+    emitEncoderFeedback(encoderTeamYellow ? yellowPositions : bluePositions, fbDt);
+
     if (isFoundBall)
         this->ballPosition = ball_position;
     emit sendBotBallContacts(bBotBallContacts, yBotBallContacts, blueBallCameraExists, yellowBallCameraExists, blueBallPixels, yellowBallPixels);
 }
 
 void Observer::updateSimulator() {
+    // Advance the actuation delay model before QML reads applied velocities.
+    float dtSec = actuationClock.nsecsElapsed() * 1e-9f;
+    actuationClock.restart();
+    if (dtSec > 0.0f && dtSec < 0.5f) {  // ignore startup / stalls
+        for (int i = 0; i < MaxRobots; ++i) {
+            blueRobots[i]->advanceActuation(dtSec);
+            yellowRobots[i]->advanceActuation(dtSec);
+        }
+    }
     emit updateSimulationSignal();
     sender->send(1, ballPosition, bluePositions, yellowPositions);
+}
+
+void Observer::emitEncoderFeedback(const QList<QVector3D> &positions, float dtSec) {
+    if (!encoderEnabled || feedbackSender == nullptr) {
+        return;
+    }
+    const int n = positions.size();
+    if (prevEncoderPositions.size() != n || dtSec <= 0.0f || dtSec > 0.5f) {
+        prevEncoderPositions = positions;  // (re)seed; need two frames to differentiate
+        return;
+    }
+    std::normal_distribution<double> gauss(0.0, encoderNoiseSigmaMps > 0.0 ? encoderNoiseSigmaMps : 1.0);
+    for (int i = 0; i < n; ++i) {
+        // positions[i] = (X = frame.x [mm], Y = -frame.z [mm], heading [deg]) —
+        // the same pose RAVEN receives on vision, so the encoder agrees with it.
+        const QVector3D &p = positions[i];
+        const QVector3D &pp = prevEncoderPositions[i];
+        double wvx = (p.x() - pp.x()) / dtSec;  // world vx [mm/s]
+        double wvy = (p.y() - pp.y()) / dtSec;  // world vy [mm/s]
+        double dthDeg = std::fmod(p.z() - pp.z() + 540.0, 360.0) - 180.0;  // wrapped [deg]
+        double omega = (dthDeg * M_PI / 180.0) / dtSec;  // [rad/s]
+        double w = p.z() * M_PI / 180.0;                 // heading [rad]
+        // Rotate world velocity into the body frame (+x heading, +y left).
+        double forward = wvx * std::cos(w) + wvy * std::sin(w);   // body vx [mm/s]
+        double left = -wvx * std::sin(w) + wvy * std::cos(w);     // body vy [mm/s]
+
+        float wheelMps[4];
+        for (int k = 0; k < 4; ++k) {
+            // v_k = sin(α)·vx − cos(α)·vy − R·ω  [mm/s] (matches RAVEN forward kin.)
+            double vMm = std::sin(wheelAngleRad[k]) * forward
+                       - std::cos(wheelAngleRad[k]) * left
+                       - robotRadiusMm * omega;
+            double vMps = vMm / 1000.0 + encoderBiasMps;
+            if (encoderNoiseSigmaMps > 0.0) {
+                vMps += gauss(encoderRng);
+            }
+            if (encoderQuantMps > 0.0) {
+                vMps = std::round(vMps / encoderQuantMps) * encoderQuantMps;
+            }
+            wheelMps[k] = static_cast<float>(vMps);
+        }
+        feedbackSender->sendRobotFeedback(i, wheelMps[0], wheelMps[1], wheelMps[2], wheelMps[3]);
+    }
+    prevEncoderPositions = positions;
 }

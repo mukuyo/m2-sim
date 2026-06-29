@@ -9,8 +9,11 @@
 #include <QTimer>
 #include <QElapsedTimer>
 
+#include <random>
+
 #include "networks/receiver.h"
 #include "networks/sender.h"
+#include "networks/feedbackSender.h"
 #include "models/robot.h"
 #include "mocSim_Packet.pb.h"
 #include "ssl_simulation_robot_control.pb.h"
@@ -188,6 +191,32 @@ private:
     QVector3D ballPosition;
 
     RobotControlResponse robotControlResponse;
+
+    // --- Synthetic wheel-encoder feedback (PiToMw to RAVEN) ---
+    // Derives each robot's body twist from the physics-reported pose (the same
+    // pose RAVEN sees on vision), maps it to wheel speeds via inverse omni
+    // kinematics, injects configurable sensor noise, and emits PiToMw.
+    void emitEncoderFeedback(const QList<QVector3D> &positions, float dtSec);
+
+    FeedbackSender *feedbackSender = nullptr;
+    QElapsedTimer actuationClock;   // dt for the actuation delay model
+    QElapsedTimer feedbackClock;    // dt for encoder velocity differentiation
+    QList<QVector3D> prevEncoderPositions;
+
+    bool encoderEnabled = false;
+    bool encoderTeamYellow = false;  // which team RAVEN controls
+    double wheelRadiusMm = 26.0;
+    double robotRadiusMm = 90.0;
+    double wheelAngleRad[4] = {0, 0, 0, 0};  // FL, BL, BR, FR
+    double encoderNoiseSigmaMps = 0.0;
+    double encoderBiasMps = 0.0;
+    double encoderQuantMps = 0.0;
+    std::mt19937 encoderRng{12345u};
+
+    float actTauLinearSec = 0.0f;
+    float actTauAngularSec = 0.0f;
+    float actDeadTimeLinearSec = 0.0f;
+    float actDeadTimeAngularSec = 0.0f;
 };
 
 #endif // OBSERVER_H
