@@ -23,6 +23,14 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     # Linux settings here
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    # Windows (MinGW) settings
+    # Dependencies installed via vcpkg:
+    #   vcpkg install boost-asio:x64-mingw-dynamic protobuf:x64-mingw-dynamic
+    # Run cmake with:
+    #   -DCMAKE_TOOLCHAIN_FILE=C:/ws/vcpkg/scripts/buildsystems/vcpkg.cmake
+    #   -DVCPKG_TARGET_TRIPLET=x64-mingw-dynamic
+    set(CMAKE_PREFIX_PATH "C:/Qt/6.10.0/mingw_64" ${CMAKE_PREFIX_PATH})
 else()
     message(FATAL_ERROR "Unsupported platform")
 endif()
@@ -31,8 +39,7 @@ endif()
 # Qt
 # ===============================
 find_package(Qt6 REQUIRED COMPONENTS
-    Core Gui Widgets
-    3DCore 3DExtras 3DRender
+    Core Gui Widgets Network
     Quick Quick3D Quick3DPhysics Qml
 )
 
@@ -42,7 +49,7 @@ find_package(Qt6 REQUIRED COMPONENTS
 find_package(Boost REQUIRED)
 
 set(protobuf_MODULE_COMPATIBLE TRUE)
-find_package(Protobuf 3.21.12 REQUIRED)
+find_package(Protobuf REQUIRED)
 
 # ===============================
 # Source layout
@@ -106,16 +113,18 @@ target_link_libraries(m2-Sim PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
-    Qt6::3DCore
-    Qt6::3DExtras
-    Qt6::3DRender
+    Qt6::Network
     Qt6::Quick
     Qt6::Quick3D
     Qt6::Quick3DPhysics
     Qt6::Qml
     ${Protobuf_LIBRARIES}
-    pthread
 )
+if(WIN32)
+    target_link_libraries(m2-Sim PRIVATE ws2_32 mswsock)
+else()
+    target_link_libraries(m2-Sim PRIVATE pthread)
+endif()
 
 # ===============================
 # Output

@@ -1,14 +1,11 @@
 import QtQuick
 import QtQuick.Window
-import Qt3D.Extras
-import QtQuick.Scene3D
 import QtQuick.Controls
-import QtQuick3D.Helpers 
+import QtQuick3D.Helpers
 import QtQuick.Layouts
 import QtQuick.Dialogs
 import QtQuick3D
 import QtQuick3D.Physics
-import Qt3D.Render
 import M2
 
 import "settings/"

@@ -1,7 +1,5 @@
 import QtQuick
 import QtQuick3D
-import Qt3D.Render
-import Qt3D.Extras
 import QtQuick3D.Physics
 import Qt.labs.folderlistmodel
 import M2

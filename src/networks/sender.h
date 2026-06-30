@@ -5,11 +5,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/optional.hpp>
 #include <boost/asio.hpp>
-#include <boost/array.hpp>
 #include <QVector3D>
 #include <QList>
 #include <QDebug>
