@@ -365,33 +365,45 @@ Window {
                         if (event.button === Qt.LeftButton && key === Qt.Key_R) {
                             game_objects.resetPosition("bot", viewport.pick(event.x, event.y));
                         } else if (event.button === Qt.LeftButton) {
-                            selectBot = hasRobotHit(viewport.pickAll(event.x, event.y));
+                            selectBot = game_objects.beginGrabBot(viewport.pickAll(event.x, event.y));
                             selectView = false;
+                            if (selectBot) mouseArea.cursorShape = Qt.ClosedHandCursor;
                         } else if (event.button === Qt.RightButton) {
                             game_objects.resetPosition("ball", viewport.pick(event.x, event.y));
                         }
                     }
                     onReleased: (event) => {
+                        if (selectBot) {
+                            game_objects.endGrabBot();
+                        }
                         selectBot = false;
                         selectView = false;
                         isDraggingWindow = false;
+                        mouseArea.cursorShape = Qt.ArrowCursor;
                     }
                     onCanceled: {
+                        if (selectBot) {
+                            game_objects.endGrabBot();
+                        }
                         selectBot = false;
                         selectView = false;
                         isDraggingWindow = false;
+                        mouseArea.cursorShape = Qt.ArrowCursor;
+                    }
+                    onExited: {
+                        if (!selectBot) mouseArea.cursorShape = Qt.ArrowCursor;
                     }
                     onPositionChanged: (event) => {
                         let clickDx = event.x - clickPos.x;
                         let clickDy = event.y - clickPos.y;
-                        
+
                         if (isDraggingWindow) {
                             window.x += clickDx
                             window.y += clickDy
                         }
                         let dx = event.x - lastPos.x;
                         let dy = event.y - lastPos.y;
-                        
+
                         let results = viewport.pickAll(event.x, event.y);
 
                         for (let i = 0; i < results.length; i++) {
@@ -400,11 +412,14 @@ Window {
                             }
                         }
                         if (selectBot && (mouseArea.pressedButtons & Qt.LeftButton)) {
-                            game_objects.resetBotPosition(results);
+                            game_objects.updateGrabBot(results);
                             lastPos = Qt.point(event.x, event.y);
                             return;
                         } else {
                             selectView = true;
+                            if (!(mouseArea.pressedButtons & Qt.LeftButton)) {
+                                mouseArea.cursorShape = hasRobotHit(results) ? Qt.OpenHandCursor : Qt.ArrowCursor;
+                            }
                         }
 
                         if (Math.abs(dx) < 2 && Math.abs(dy) < 2) return;

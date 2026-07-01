@@ -24,6 +24,15 @@ Node {
     property real radianOffset: -Math.atan(350.0/547.72)
     property var selectedRobotColor: "blue"
     property real botCursorID: 0
+
+    // --- Grab & carry state (mouse drag pick-up of a robot) ---
+    property bool isGrabbingBot: false
+    property string grabbedColor: "blue"
+    property int grabbedId: -1
+    property real grabOffsetX: 0
+    property real grabOffsetZ: 0
+    property real grabLiftHeight: 80
+
     property var kickFlag: false
     property var pendingKickVelocity: null
     property var preBallPosition: Qt.vector4d(0, 0, 0, 0)
@@ -61,6 +70,12 @@ Node {
                 yellow.kickspeeds[i] = Qt.vector3d(observer.yellow_robots[i].kickspeedx, observer.yellow_robots[i].kickspeedz, observer.yellow_robots[i].kickspeedx);
                 yellow.spinners[i] = observer.yellow_robots[i].spinner;
             }
+        }
+        function onRobotReplacementRequested(id, isYellow, sceneX, sceneZ, sceneRotYDeg) {
+            (isYellow ? yBotsFrame : bBotsFrame).children[id].reset(Qt.vector3d(sceneX, 0, sceneZ), Qt.vector3d(0, sceneRotYDeg, 0));
+        }
+        function onBallReplacementRequested(sceneX, sceneZ) {
+            ball.reset(Qt.vector3d(sceneX, 21, sceneZ), Qt.vector3d(0, 0, 0));
         }
     }
 
@@ -163,6 +178,27 @@ Node {
                             }
                         }
                     ]
+                }
+            }
+            // Glowing "grabbed" ring: only visible on the robot currently
+            // being picked up/carried, so it's obvious at a glance which one
+            // has been grabbed.
+            Model {
+                source: "#Cylinder"
+                visible: isGrabbingBot && grabbedColor === "blue" && grabbedId === index
+                scale: Qt.vector3d(0.62, 0.015, 0.62)
+                position: Qt.vector3d(0, 4, 0)
+                opacity: 0.6
+                materials: [
+                    DefaultMaterial {
+                        diffuseColor: "#00E5FF"
+                        lighting: DefaultMaterial.NoLighting
+                    }
+                ]
+                SequentialAnimation on opacity {
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 0.9; duration: 450; easing.type: Easing.InOutQuad }
+                    NumberAnimation { to: 0.25; duration: 450; easing.type: Easing.InOutQuad }
                 }
             }
         }
@@ -272,6 +308,27 @@ Node {
                             }
                         }
                     ]
+                }
+            }
+            // Glowing "grabbed" ring: only visible on the robot currently
+            // being picked up/carried, so it's obvious at a glance which one
+            // has been grabbed.
+            Model {
+                source: "#Cylinder"
+                visible: isGrabbingBot && grabbedColor === "yellow" && grabbedId === index
+                scale: Qt.vector3d(0.62, 0.015, 0.62)
+                position: Qt.vector3d(0, 4, 0)
+                opacity: 0.6
+                materials: [
+                    DefaultMaterial {
+                        diffuseColor: "#00E5FF"
+                        lighting: DefaultMaterial.NoLighting
+                    }
+                ]
+                SequentialAnimation on opacity {
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 0.9; duration: 450; easing.type: Easing.InOutQuad }
+                    NumberAnimation { to: 0.25; duration: 450; easing.type: Easing.InOutQuad }
                 }
             }
         }
@@ -472,25 +529,81 @@ Node {
         }
     }
 
-    function resetBotPosition(results) {
-        let scenePosition = Qt.vector3d(0, 0, 0);
+    // Finds the field-plane hit point in a pickAll() result list, or null if the
+    // cursor isn't over the field this frame (e.g. it slid off the pitch).
+    function findFieldHit(results) {
         for (let i = 0; i < results.length; i++) {
-            if (results[i].objectHit.objectName == "field") scenePosition = results[i].scenePosition;
-        }
-        for (let i = 0; i < results.length; i++) {
-            if (results[i].objectHit.objectName.startsWith("b")) {
-                selectedRobotColor = "blue";
-                botCursorID = parseInt(results[i].objectHit.objectName.slice(1));;
-            } else if (results[i].objectHit.objectName.startsWith("y")) {
-                selectedRobotColor = "yellow";
-                botCursorID = parseInt(results[i].objectHit.objectName.slice(1));;
+            if (results[i].objectHit.objectName == "field") {
+                return results[i].scenePosition;
             }
         }
-        if (selectedRobotColor == "blue") {
-            bBotsFrame.children[botCursorID].reset(scenePosition, Qt.vector3d(0, -90, 0));
-        } else if (selectedRobotColor == "yellow") {
-            yBotsFrame.children[botCursorID].reset(scenePosition, Qt.vector3d(0, 90, 0));
+        return null;
+    }
+
+    // Picks whichever robot is under the cursor (if any) out of a pickAll() result list.
+    function findBotHit(results) {
+        let hit = { color: null, id: -1 };
+        for (let i = 0; i < results.length; i++) {
+            let name = results[i].objectHit.objectName;
+            if (name.startsWith("b")) {
+                hit.color = "blue";
+                hit.id = parseInt(name.slice(1));
+            } else if (name.startsWith("y")) {
+                hit.color = "yellow";
+                hit.id = parseInt(name.slice(1));
+            }
         }
+        return hit;
+    }
+
+    // --- Grab & carry -------------------------------------------------------
+    // Press-down on a robot: "picks it up" (lifts it off the pitch) and remembers
+    // the offset between the robot's origin and the click point, so the robot
+    // keeps its position relative to the cursor instead of snapping its center
+    // onto the pointer. Returns true if a robot was actually grabbed.
+    function beginGrabBot(results) {
+        let fieldPos = findFieldHit(results);
+        let hit = findBotHit(results);
+        if (fieldPos === null || hit.color === null) return false;
+
+        let frame = (hit.color == "blue" ? bBotsFrame : yBotsFrame).children[hit.id];
+
+        grabbedColor = hit.color;
+        grabbedId = hit.id;
+        grabOffsetX = frame.position.x - fieldPos.x;
+        grabOffsetZ = frame.position.z - fieldPos.z;
+        isGrabbingBot = true;
+
+        // Keep the existing "selected robot" concept (used by the R-key reset
+        // shortcut) in sync with whatever we just grabbed.
+        selectedRobotColor = hit.color;
+        botCursorID = hit.id;
+
+        frame.reset(Qt.vector3d(frame.position.x, grabLiftHeight, frame.position.z), frame.eulerRotation);
+        return true;
+    }
+
+    // Called while the mouse moves with the button held: carries the grabbed
+    // robot to the new cursor position (offset-corrected, lifted, and clamped
+    // to stay on the pitch), keeping its current heading untouched.
+    function updateGrabBot(results) {
+        if (!isGrabbingBot) return;
+        let fieldPos = findFieldHit(results);
+        if (fieldPos === null) return;
+
+        let frame = (grabbedColor == "blue" ? bBotsFrame : yBotsFrame).children[grabbedId];
+        let targetX = Math.max(-6200, Math.min(6200, fieldPos.x + grabOffsetX));
+        let targetZ = Math.max(-4700, Math.min(4700, fieldPos.z + grabOffsetZ));
+        frame.reset(Qt.vector3d(targetX, grabLiftHeight, targetZ), frame.eulerRotation);
+    }
+
+    // Mouse released: sets the carried robot back down where it currently is.
+    function endGrabBot() {
+        if (!isGrabbingBot) return;
+        let frame = (grabbedColor == "blue" ? bBotsFrame : yBotsFrame).children[grabbedId];
+        frame.reset(Qt.vector3d(frame.position.x, 0, frame.position.z), frame.eulerRotation);
+        isGrabbingBot = false;
+        grabbedId = -1;
     }
 
     function updateBallModel() {

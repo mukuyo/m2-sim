@@ -101,6 +101,25 @@ void Observer::visionReceive(const mocSim_Packet& packet) {
     }
     if (isYellow) emit yellowRobotsChanged();
     else emit blueRobotsChanged();
+
+    // Robot/ball placement (Replacement). turnon=false (robot removal) is not
+    // handled: this side always sends turnon=true.
+    for (const auto& robotReplacement : packet.replacement().robots()) {
+        int id = robotReplacement.id();
+        if (id < 0 || id >= MaxRobots) continue;
+        float sceneX = robotReplacement.x() * 1000.0f;
+        float sceneZ = -robotReplacement.y() * 1000.0f;
+        float sceneRotYDeg = robotReplacement.dir() * 180.0 / M_PI - 90.0;
+        emit robotReplacementRequested(id, robotReplacement.yellowteam(), sceneX, sceneZ, sceneRotYDeg);
+    }
+    if (packet.replacement().has_ball()) {
+        const auto& ballReplacement = packet.replacement().ball();
+        if (ballReplacement.has_x() && ballReplacement.has_y()) {
+            float sceneX = ballReplacement.x() * 1000.0f;
+            float sceneZ = -ballReplacement.y() * 1000.0f;
+            emit ballReplacementRequested(sceneX, sceneZ);
+        }
+    }
 }
 
 void Observer::controlReceive(const RobotControl& packet, bool isYellow) {

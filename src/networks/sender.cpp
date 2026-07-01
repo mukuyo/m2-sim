@@ -59,7 +59,11 @@ void Sender::send(int camera_num, QVector3D ball_position, QList<QVector3D> blue
             std::cerr << "Failed to serialize command." << std::endl;
             return;
         }
-        socket_.send_to(boost::asio::buffer(serializedData), endpoint_);
+        boost::system::error_code ec;
+        socket_.send_to(boost::asio::buffer(serializedData), endpoint_, 0, ec);
+        if (ec) {
+            std::cerr << "[Sender] send failed: " << ec.message() << std::endl;
+        }
     }
     geometryCount++;
     captureCount++;
